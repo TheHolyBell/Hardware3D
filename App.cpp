@@ -25,5 +25,6 @@ int App::Go()
 
 void App::DoFrame()
 {
-	std::cout << "Here\n";
+	m_Window.Gfx().ClearBuffer(1, 0, 1);
+	m_Window.Gfx().EndFrame();
 }

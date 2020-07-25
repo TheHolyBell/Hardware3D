@@ -1,9 +1,11 @@
 #pragma once
 #include "ChiliWin.h"
 #include "ChiliException.h"
+#include <optional>
 #include "Keyboard.h"
 #include "Mouse.h"
-#include <optional>
+#include "Graphics.h"
+#include <memory>
 
 // Error exception helper macro
 #define CHWND_EXCEPT(hr) Window::Exception(__LINE__, __FILE__, hr)
@@ -58,7 +60,7 @@ public:
 	Window&operator=(Window&& rhs) = delete;
 
 	void SetTitle(const std::string& title);
-
+	Graphics& Gfx() const;
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMsgThunk(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -70,4 +72,5 @@ private:
 	int m_Width;
 	int m_Height;
 	HWND m_hWnd;
+	std::unique_ptr<Graphics> m_pGraphics;
 };

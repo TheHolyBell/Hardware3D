@@ -71,6 +71,8 @@ Window::Window(int Width, int Height, const char* Name)
 	}
 	// show window
 	ShowWindow(m_hWnd, SW_SHOWDEFAULT);
+
+	m_pGraphics = std::make_unique<Graphics>(m_hWnd, Width, Height);
 }
 
 Window::~Window()
@@ -81,6 +83,11 @@ Window::~Window()
 void Window::SetTitle(const std::string& title)
 {
 	SetWindowText(m_hWnd, title.c_str());
+}
+
+Graphics& Window::Gfx() const
+{
+	return *m_pGraphics;
 }
 
 LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
