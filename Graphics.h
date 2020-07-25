@@ -1,9 +1,11 @@
 #pragma once
 #include "ChiliWin.h"
+#include "ChiliException.h"
+#include "DxgiInfoManager.h"
 #include <d3d11.h>
 #include <wrl\client.h>
 #include <vector>
-#include "ChiliException.h"
+#include <string>
 
 class Graphics
 {
@@ -45,6 +47,9 @@ public:
 	void ClearBuffer(float red, float green, float blue) noexcept;
 	void EndFrame();
 private:
+#ifndef NDEBUG
+	DxgiInfoManager m_InfoManager;
+#endif
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> m_pSwapChain;
