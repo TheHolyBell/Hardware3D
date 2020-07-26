@@ -1,7 +1,7 @@
 #pragma once
 #include "Window.h"
 #include <string>
-#include "Box.h"
+#include "Drawable.h"
 #include "Timer.h"
 
 class App
@@ -14,5 +14,6 @@ private:
 private:
 	Window m_Window;
 	Timer m_Timer;
-	std::vector<std::unique_ptr<Box>> m_Boxes;
+	std::vector<std::unique_ptr<Drawable>> m_Drawables;
+	static constexpr size_t NumberDrawables = 180;
 };
