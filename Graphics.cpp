@@ -2,23 +2,16 @@
 #include "dxerr.h"
 #include <sstream>
 #include "Window.h"
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+#include "GraphicsThrowMacros.h"
 
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 
-// graphics exception checking/throwing macros (some with dxgi infos)
-#define GFX_EXCEPT_NOINFO(hr) Graphics::HrException( __LINE__,__FILE__,(hr) )
-#define GFX_THROW_NOINFO(hrcall) if( FAILED( hr = (hrcall) ) ) throw Graphics::HrException( __LINE__,__FILE__,hr )
+namespace dx = DirectX;
 
-#ifndef NDEBUG
-#define GFX_EXCEPT(hr) Graphics::HrException( __LINE__,__FILE__,(hr),m_InfoManager.GetMessages() )
-#define GFX_THROW_INFO(hrcall) m_InfoManager.Set(); if( FAILED( hr = (hrcall) ) ) throw GFX_EXCEPT(hr)
-#define GFX_DEVICE_REMOVED_EXCEPT(hr) Graphics::DeviceRemovedException( __LINE__,__FILE__,(hr),m_InfoManager.GetMessages() )
-#else
-#define GFX_EXCEPT(hr) Graphics::HrException( __LINE__,__FILE__,(hr) )
-#define GFX_THROW_INFO(hrcall) GFX_THROW_NOINFO(hrcall)
-#define GFX_DEVICE_REMOVED_EXCEPT(hr) Graphics::DeviceRemovedException( __LINE__,__FILE__,(hr) )
-#endif
 
 Graphics::Graphics(HWND hwnd, int Width, int Height)
 {
@@ -66,19 +59,46 @@ Graphics::Graphics(HWND hwnd, int Width, int Height)
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> _pBackBuffer = nullptr;
 	GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_pBackBuffer));
 	GFX_THROW_INFO(m_pDevice->CreateRenderTargetView(_pBackBuffer.Get(), nullptr, &m_pRTV));
+
+	// Create depth/stencil texture
+	D3D11_TEXTURE2D_DESC _depthDesc = {};
+	_depthDesc.Width = Width;
+	_depthDesc.Height = Height;
+	_depthDesc.Usage = D3D11_USAGE_DEFAULT;
+	_depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	_depthDesc.SampleDesc = sd.SampleDesc;
+	_depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	_depthDesc.ArraySize = 1;
+	_depthDesc.MipLevels = 1;
+	
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> _pDepthTexture;
+
+	GFX_THROW_INFO(m_pDevice->CreateTexture2D(&_depthDesc, nullptr, &_pDepthTexture));
+	GFX_THROW_INFO(m_pDevice->CreateDepthStencilView(_pDepthTexture.Get(), nullptr, &m_pDSV));
+
+	D3D11_VIEWPORT vp = {};
+	vp.Width = Width;
+	vp.Height = Height;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+
+	m_pImmediateContext->RSSetViewports(1, &vp);
+
+	m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), m_pDSV.Get());
 }
 
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	float _color[] = { red, green, blue, 1.0f };
 	m_pImmediateContext->ClearRenderTargetView(m_pRTV.Get(), _color);
+	m_pImmediateContext->ClearDepthStencilView(m_pDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 void Graphics::EndFrame()
 {
 	HRESULT hr;
 #ifndef NDEBUG
-	m_InfoManager.Set();
+	infoManager.Set();
 #endif
 	if (FAILED(hr = m_pSwapChain->Present(1u, 0u)))
 	{
@@ -92,6 +112,22 @@ void Graphics::EndFrame()
 		}
 	}
 }
+
+void Graphics::DrawIndexed(UINT count) noexcept(!IS_DEBUG)
+{
+	GFX_THROW_INFO_ONLY(m_pImmediateContext->DrawIndexed(count, 0u, 0u));
+}
+
+void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+	m_Projection = proj;
+}
+
+DirectX::XMMATRIX Graphics::GetProjection() const noexcept
+{
+	return m_Projection;
+}
+
 
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
 	: Exception(line, file), m_HR(hr)
@@ -153,4 +189,38 @@ std::string Graphics::HrException::GetErrorInfo() const noexcept
 const char* Graphics::DeviceRemovedException::GetType() const noexcept
 {
 	return "Chili Graphics Exception [Device Removed] (DXGI_ERRRO_DEVICE_REMOVED)";
+}
+
+Graphics::InfoException::InfoException(int line, const char* file, std::vector<std::string> infoMsgs) noexcept
+	: Exception(line, file)
+{
+	// Join all info messages with newlines into single string
+	for (const auto& m : infoMsgs)
+	{
+		m_Info += m;
+		m_Info.push_back('\n');
+	}
+	// Remove final newline if exists
+	if (!m_Info.empty())
+		m_Info.pop_back();
+}
+
+const char* Graphics::InfoException::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "\n[Error Info]\n" << GetErrorInfo() << "\n\n";
+	oss << GetOriginString();
+	m_WhatBuffer = oss.str();
+	return m_WhatBuffer.c_str();
+}
+
+const char* Graphics::InfoException::GetType() const noexcept
+{
+	return "Chili Graphics Info Exception";
+}
+
+std::string Graphics::InfoException::GetErrorInfo() const noexcept
+{
+	return m_Info;
 }

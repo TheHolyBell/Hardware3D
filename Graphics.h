@@ -4,11 +4,13 @@
 #include "DxgiInfoManager.h"
 #include <d3d11.h>
 #include <wrl\client.h>
+#include <DirectXMath.h>
 #include <vector>
 #include <string>
 
 class Graphics
 {
+	friend class Bindable;
 public:
 	class Exception : public ChiliException
 	{
@@ -26,6 +28,16 @@ public:
 		std::string GetErrorInfo() const noexcept;
 	private:
 		HRESULT m_HR;
+		std::string m_Info;
+	};
+	class InfoException : public Exception
+	{
+	public:
+		InfoException(int line, const char* file, std::vector<std::string> infoMsgs) noexcept;
+		virtual const char* what() const noexcept override;
+		virtual const char* GetType() const noexcept override;
+		std::string GetErrorInfo() const noexcept;
+	private:
 		std::string m_Info;
 	};
 	class DeviceRemovedException : public HrException
@@ -46,12 +58,19 @@ public:
 	Graphics& operator=(Graphics&& rhs) = delete;
 	void ClearBuffer(float red, float green, float blue) noexcept;
 	void EndFrame();
+	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
+	void SetProjection(DirectX::FXMMATRIX projection) noexcept;
+	DirectX::XMMATRIX GetProjection() const noexcept;
 private:
 #ifndef NDEBUG
-	DxgiInfoManager m_InfoManager;
+	DxgiInfoManager infoManager;
 #endif
+
+	DirectX::XMMATRIX m_Projection;
+
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> m_pSwapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRTV;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDSV;
 };

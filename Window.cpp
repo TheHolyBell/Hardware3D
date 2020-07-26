@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "WindowsThrowMacros.h"
 #include "resource.h"
 #include <sstream>
 #include <string>
