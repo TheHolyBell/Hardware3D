@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include "ImGui\imgui_impl_win32.h"
 
 Window::WindowClass Window::WindowClass::s_Instance;
 
@@ -73,12 +74,21 @@ Window::Window(int Width, int Height, const char* Name)
 	// show window
 	ShowWindow(m_hWnd, SW_SHOWDEFAULT);
 
-	m_pGraphics = std::make_unique<Graphics>(m_hWnd, Width, Height);
+	// Init ImGui Win32 Impl
+	ImGui_ImplWin32_Init(m_hWnd);
+
+	m_pGraphics = std::make_unique<Graphics>(*this);
 }
 
 Window::~Window()
 {
+	ImGui_ImplWin32_Shutdown();
 	DestroyWindow(m_hWnd);
+}
+
+void Window::RegisterOnResizeCallback(std::function<void(int, int)> Func)
+{
+	OnResize = Func;
 }
 
 void Window::SetTitle(const std::string& title)
@@ -91,6 +101,21 @@ Graphics& Window::Gfx() const
 	if (m_pGraphics == nullptr)
 		throw CHWND_NOGFX_EXCEPT();
 	return *m_pGraphics;
+}
+
+HWND Window::GetHWND() const
+{
+	return m_hWnd;
+}
+
+int Window::GetWidth() const
+{
+	return m_Width;
+}
+
+int Window::GetHeight() const
+{
+	return m_Height;
 }
 
 LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -122,8 +147,21 @@ LRESULT CALLBACK Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
 LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		return 1;
+
+	auto& ImgIO = ImGui::GetIO();
+
 	switch (msg)
 	{
+	case WM_SIZE:
+		{
+			m_Width = LOWORD(lParam);
+			m_Height = HIWORD(lParam);
+			if (OnResize != nullptr)
+				OnResize(m_Width, m_Height);
+		}
+		break;
 		// we don't want the DefProc to handle this message because
 		// we want our destructor to destroy the window, so return 0 instead of break
 	case WM_CLOSE:
@@ -138,6 +176,8 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	case WM_KEYDOWN:
 		// syskey commands need to be handled to track ALT key (VK_MENU) and F10
 	case WM_SYSKEYDOWN:
+		if (ImgIO.WantCaptureKeyboard)
+			break;
 		if (!(lParam & 0x40000000) || g_Keyboard.AutorepeatIsEnabled()) // filter autorepeat
 		{
 			g_Keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
@@ -145,9 +185,13 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		break;
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
+		if (ImgIO.WantCaptureKeyboard)
+			break;
 		g_Keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
 		break;
 	case WM_CHAR:
+		if (ImgIO.WantCaptureKeyboard)
+			break;
 		g_Keyboard.OnChar(static_cast<unsigned char>(wParam));
 		break;
 		/*********** END KEYBOARD MESSAGES ***********/

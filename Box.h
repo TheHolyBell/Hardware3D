@@ -1,9 +1,8 @@
 #pragma once
-#include "DrawableBase.h"
+#include "TestObject.h"
+#include "ConstantBuffers.h"
 
-#include <random>
-
-class Box : public DrawableBase<Box>
+class Box : public TestObject<Box>
 {
 public:
 	Box(Graphics& gfx, std::mt19937& rng,
@@ -11,25 +10,23 @@ public:
 		std::uniform_real_distribution<float>& ddist,
 		std::uniform_real_distribution<float>& odist,
 		std::uniform_real_distribution<float>& rdist,
-		std::uniform_real_distribution<float>& bdist);
-	virtual void Update(float dt) noexcept override;
-	virtual DirectX::XMMATRIX GetTransformXM() const noexcept override;
-private:
-	// positional
-	float r;
-	float roll = 0.0f;
-	float pitch = 0.0f;
-	float yaw = 0.0f;
-	float theta;
-	float phi;
-	float chi;
-	// speed (delta/s)
-	float droll;
-	float dpitch;
-	float dyaw;
-	float dtheta;
-	float dphi;
-	float dchi;
+		std::uniform_real_distribution<float>& bdist,
+		DirectX::XMFLOAT3 material);
 
-	DirectX::XMFLOAT3X3 mt;
+	virtual DirectX::XMMATRIX GetTransformXM() const noexcept override;
+	// Returns false if window is closed
+	bool SpawnControlWindow(int id, Graphics& gfx) noexcept;
+private:
+	void SyncMaterial(Graphics& gfx) noexcept(!IS_DEBUG);
+private:
+	struct PSMaterialConstant
+	{
+		DirectX::XMFLOAT3 color;
+		float specularIntensity = 0.6f;
+		float specularPower = 30.0f;
+		float padding[3];
+	} m_MaterialConstants;
+	using MaterialCbuf = PixelConstantBuffer<PSMaterialConstant>;
+
+	DirectX::XMFLOAT3X3 m_Matrix;
 };

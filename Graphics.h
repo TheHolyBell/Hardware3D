@@ -49,23 +49,35 @@ public:
 		std::string m_Reason;
 	};
 public:
-	Graphics(HWND hwnd, int Width, int Height);
+	Graphics(class Window& window);
 
 	Graphics(const Graphics& rhs) = delete;
 	Graphics&operator=(const Graphics& rhs) = delete;
 
 	Graphics(Graphics&& rhs) = delete;
 	Graphics& operator=(Graphics&& rhs) = delete;
-	void ClearBuffer(float red, float green, float blue) noexcept;
+	void BeginFrame(float red, float green, float blue) noexcept;
 	void EndFrame();
 	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
+	
 	void SetProjection(DirectX::FXMMATRIX projection) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
+	
+	void SetCamera(DirectX::FXMMATRIX view) noexcept;
+	DirectX::XMMATRIX GetCamera() const noexcept;
+
+	void EnableImGui() noexcept;
+	void DisableImGui() noexcept;
+	bool IsImGuiEnabled() const noexcept;
 private:
+	void OnResize(int Width, int Height);
+private:
+	bool m_bImGuiEnabled = true;
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;
 #endif
 
+	DirectX::XMMATRIX m_Camera;
 	DirectX::XMMATRIX m_Projection;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;

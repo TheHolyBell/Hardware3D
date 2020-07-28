@@ -6,7 +6,7 @@
 #include "Mouse.h"
 #include "Graphics.h"
 #include <memory>
-
+#include <functional>
 
 class Window
 {	
@@ -68,8 +68,14 @@ public:
 	Window(Window&& rhs) = delete;
 	Window&operator=(Window&& rhs) = delete;
 
+	void RegisterOnResizeCallback(std::function<void(int, int)> Func);
+
 	void SetTitle(const std::string& title);
 	Graphics& Gfx() const;
+	
+	HWND GetHWND() const;
+	int GetWidth() const;
+	int GetHeight() const;
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMsgThunk(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -82,4 +88,6 @@ private:
 	int m_Height;
 	HWND m_hWnd;
 	std::unique_ptr<Graphics> m_pGraphics;
+	
+	std::function<void(int, int)> OnResize;
 };
