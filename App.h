@@ -8,6 +8,7 @@
 #include "PointLight.h"
 #include <set>
 #include <optional>
+#include "Mesh.h"
 
 class App
 {
@@ -16,17 +17,22 @@ public:
 	int Go();
 private:
 	void DoFrame();
-	void SpawnBoxWindowManagerWindow() noexcept;
-	void SpawnBoxWindows();
+	void ShowModelWindow();
 private:
 	ImguiManager m_ImGuiManager;
 	Window m_Window;
 	Camera m_Camera;
 	Timer m_Timer;
-	std::vector<std::unique_ptr<Drawable>> m_Drawables;
-	std::vector<class Box*> m_Boxes;
+	std::unique_ptr<Model> m_Model;
 	PointLight m_Light;
-	std::optional<int> m_ComboBoxIndex;
-	std::set<int> m_BoxControlIds;
-	static constexpr size_t NumberDrawables = 180;
+	struct
+	{
+		float pitch = 0.0f;
+		float yaw = 0.0f;
+		float roll = 0.0f;
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
+	} m_Pos;
+	int x = 0, y = 0;
 };

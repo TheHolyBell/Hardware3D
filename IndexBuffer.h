@@ -2,13 +2,16 @@
 #include "Bindable.h"
 #include <vector>
 
-class IndexBuffer : public Bindable
+namespace Bind
 {
-public:
-	IndexBuffer(Graphics& gfx, const std::vector<unsigned short>& indices);
-	virtual void Bind(Graphics& gfx) noexcept override;
-	UINT GetCount() const noexcept;
-protected:
-	UINT m_Count;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIndexBuffer;
-};
+	class IndexBuffer : public Bindable
+	{
+	public:
+		IndexBuffer(Graphics& gfx, const std::vector<unsigned short>& indices);
+		virtual void Bind(Graphics& gfx) noexcept override;
+		UINT GetCount() const noexcept;
+	protected:
+		UINT m_Count;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> m_pIndexBuffer;
+	};
+}

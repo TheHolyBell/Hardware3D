@@ -2,8 +2,13 @@
 #include "Graphics.h"
 #include <DirectXMath.h>
 #include <memory>
+#include "ConditionalNoexcept.h"
 
-class Bindable;
+namespace Bind
+{
+	class Bindable;
+	class IndexBuffer;
+}
 
 class Drawable
 {
@@ -17,8 +22,8 @@ public:
 	virtual ~Drawable() = default;
 
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
-	void Draw(Graphics& gfx) const noexcept(!IS_DEBUG);
-	virtual void Update(float dt) noexcept = 0;
+	void Draw(Graphics& gfx) const noxnd;
+	virtual void Update(float dt) noexcept{}
 protected:
 	template<class T>
 	T* QueryBindable() noexcept
@@ -30,11 +35,11 @@ protected:
 		}
 		return nullptr;
 	}
-	void AddBind(std::unique_ptr<Bindable> bind) noexcept(!IS_DEBUG);
-	void AddIndexBuffer(std::unique_ptr<class IndexBuffer> indexBuffer) noexcept;
+	void AddBind(std::unique_ptr<Bind::Bindable> bind) noxnd;
+	void AddIndexBuffer(std::unique_ptr<Bind::IndexBuffer> indexBuffer) noexcept;
 private:
-	virtual const std::vector<std::unique_ptr<Bindable>>& GetStaticBinds() const noexcept = 0;
+	virtual const std::vector<std::unique_ptr<Bind::Bindable>>& GetStaticBinds() const noexcept = 0;
 private:
-	const IndexBuffer* m_pIndexBuffer = nullptr;
-	std::vector<std::unique_ptr<Bindable>> m_Binds;
+	const Bind::IndexBuffer* m_pIndexBuffer = nullptr;
+	std::vector<std::unique_ptr<Bind::Bindable>> m_Binds;
 };

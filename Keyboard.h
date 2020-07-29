@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <bitset>
+#include <optional>
 
 class Keyboard
 {
@@ -13,11 +14,10 @@ public:
 		enum class Type
 		{
 			Press,
-			Release,
-			Invalid
+			Release
 		};
 	private:
-		Type m_Type = Type::Invalid;
+		Type m_Type;
 		unsigned char m_Code = 0;
 	public:
 		Event() noexcept = default;
@@ -46,19 +46,17 @@ public:
 	Keyboard(Keyboard&& rhs) = delete;
 	Keyboard& operator=(Keyboard&& rhs) = delete;
 
-	// Key event stuff
+	// key event stuff
 	bool KeyIsPressed(unsigned char keycode) const noexcept;
-	Event ReadKey() noexcept;
+	std::optional<Event> ReadKey() noexcept;
 	bool KeyIsEmpty() const noexcept;
 	void FlushKey() noexcept;
-
-	// Char event stuff
-	char ReadChar() noexcept;
+	// char event stuff
+	std::optional<char> ReadChar() noexcept;
 	bool CharIsEmpty() const noexcept;
 	void FlushChar() noexcept;
 	void Flush() noexcept;
-
-	// Autorepeat control
+	// autorepeat control
 	void EnableAutorepeat() noexcept;
 	void DisableAutorepeat() noexcept;
 	bool AutorepeatIsEnabled() const noexcept;
@@ -67,12 +65,14 @@ private:
 	void OnKeyReleased(unsigned char keycode) noexcept;
 	void OnChar(char character) noexcept;
 	void ClearState() noexcept;
-
+	
 	template<typename T>
 	static void TrimBuffer(std::queue<T>& buffer) noexcept
 	{
 		while (buffer.size() > BufferSize)
+		{
 			buffer.pop();
+		}
 	}
 private:
 	static constexpr unsigned int NumKeys = 256u;

@@ -1,10 +1,15 @@
 #pragma once
 #include <queue>
+#include <optional>
 
 class Mouse
 {
 	friend class Window;
 public:
+	struct RawDelta
+	{
+		int x, y;
+	};
 	class Event
 	{
 	public:
@@ -19,10 +24,9 @@ public:
 			Move,
 			Enter,
 			Leave,
-			Invalid
 		};
 	private:
-		Type m_Type = Type::Invalid;
+		Type m_Type;
 		bool m_bLeftIsPressed = false;
 		bool m_bRightIsPressed = false;
 		int m_X = 0;
@@ -36,15 +40,12 @@ public:
 			m_X(parent.m_X),
 			m_Y(parent.m_Y)
 		{}
-		bool IsValid() const noexcept
-		{
-			return m_Type != Type::Invalid;
-		}
+
 		Type GetType() const noexcept
 		{
 			return m_Type;
 		}
-		std::pair<int, int> Pair() const noexcept
+		std::pair<int, int> GetPos() const noexcept
 		{
 			return { m_X,m_Y };
 		}
@@ -76,18 +77,23 @@ public:
 	Mouse& operator=(Mouse&& rhs) = delete;
 
 	std::pair<int, int> GetPos() const noexcept;
+	std::optional<RawDelta> ReadRawDelta() noexcept;
 	int GetPosX() const noexcept;
 	int GetPosY() const noexcept;
 	bool IsInWindow() const noexcept;
 	bool LeftIsPressed() const noexcept;
 	bool RightIsPressed() const noexcept;
-	Mouse::Event Read() noexcept;
+	std::optional<Mouse::Event> Read() noexcept;
 	bool IsEmpty() const noexcept;
 	void Flush() noexcept;
+	void EnableRaw() noexcept;
+	void DisableRaw() noexcept;
+	bool RawEnabled() const noexcept;
 private:
 	void OnMouseMove(int x, int y) noexcept;
 	void OnMouseLeave() noexcept;
 	void OnMouseEnter() noexcept;
+	void OnRawDelta(int dx, int dy) noexcept;
 	void OnLeftPressed(int x, int y) noexcept;
 	void OnLeftReleased(int x, int y) noexcept;
 	void OnRightPressed(int x, int y) noexcept;
@@ -95,6 +101,7 @@ private:
 	void OnWheelUp(int x, int y) noexcept;
 	void OnWheelDown(int x, int y) noexcept;
 	void TrimBuffer() noexcept;
+	void TrimRawInputBuffer() noexcept;
 	void OnWheelDelta(int x, int y, int delta) noexcept;
 
 private:
@@ -106,4 +113,7 @@ private:
 	bool m_bIsInWindow = false;
 	int m_WheelDeltaCarry = 0;
 	std::queue<Event> m_Buffer;
+
+	bool m_bRawEnabled = false;
+	std::queue<RawDelta> m_RawDeltaBuffer;
 };

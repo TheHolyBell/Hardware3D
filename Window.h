@@ -73,10 +73,20 @@ public:
 	void SetTitle(const std::string& title);
 	Graphics& Gfx() const;
 	
+	void EnableCursor() noexcept;
+	void DisableCursor() noexcept;
+	bool CursorEnabled() const noexcept;
+
 	HWND GetHWND() const;
 	int GetWidth() const;
 	int GetHeight() const;
 private:
+	void ConfineCursor() noexcept;
+	void FreeCursor() noexcept;
+	void ShowCursor() noexcept;
+	void HideCursor() noexcept;
+	void EnableImGuiMouse() noexcept;
+	void DisableImGuiMouse() noexcept;
 	static LRESULT CALLBACK HandleMsgSetup(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMsgThunk(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	LRESULT HandleMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -89,5 +99,8 @@ private:
 	HWND m_hWnd;
 	std::unique_ptr<Graphics> m_pGraphics;
 	
+	bool m_bCursorEnabled = true;
+	std::vector<BYTE> m_RawBuffer;
+
 	std::function<void(int, int)> OnResize;
 };

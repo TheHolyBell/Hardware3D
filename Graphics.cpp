@@ -180,7 +180,7 @@ void Graphics::OnResize(int Width, int Height)
 	m_pImmediateContext->RSSetViewports(1, &vp);
 
 	m_Projection = DirectX::XMMatrixPerspectiveLH(1.0f, (float)Height / (float)Width, 0.5f, 40.0f);
-	std::cout << "Window resized. New dimensions: [" << Width << ";" << Height << ")\n";
+	std::cout << "Window resized. New dimensions: [" << Width << ";" << Height << "]\n";
 
 	m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), m_pDSV.Get());
 }

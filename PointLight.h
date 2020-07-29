@@ -26,5 +26,5 @@ private:
 private:
 	PointLightCBuf m_cbData;
 	mutable SolidSphere m_Mesh;
-	mutable PixelConstantBuffer<PointLightCBuf> m_CBuffer;
+	mutable Bind::PixelConstantBuffer<PointLightCBuf> m_CBuffer;
 };

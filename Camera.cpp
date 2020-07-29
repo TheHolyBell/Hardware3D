@@ -1,20 +1,23 @@
 #include "Camera.h"
 #include "ImGui\imgui.h"
+#include "ChiliMath.h"
+#include <algorithm>
 
 namespace dx = DirectX;
 
+Camera::Camera() noexcept
+{
+	Reset();
+}
+
 DirectX::XMMATRIX Camera::GetMatrix() const noexcept
 {
-	const auto pos = dx::XMVector3Transform(
-		dx::XMVectorSet(0.0f, 0.0f, -r, 0.0f),
-		dx::XMMatrixRotationRollPitchYaw(phi, -theta, 0.0f)
-	);
-	return dx::XMMatrixLookAtLH(
-		pos, dx::XMVectorZero(),
-		dx::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)
-	) * dx::XMMatrixRotationRollPitchYaw(
-		pitch, -yaw, roll
-	);
+	using namespace DirectX;
+
+	auto translation = XMMatrixTranslation(-m_Pos.x, -m_Pos.y, -m_Pos.z);
+	auto rotation = XMMatrixTranspose(XMMatrixRotationRollPitchYaw(m_Pitch, m_Yaw, 0.0f));
+
+	return translation * rotation;
 }
 
 void Camera::SpawnControlWindow() noexcept
@@ -22,27 +25,44 @@ void Camera::SpawnControlWindow() noexcept
 	if (ImGui::Begin("Camera"))
 	{
 		ImGui::Text("Position");
-		ImGui::SliderFloat("R", &r, 0.0f, 80.0f, "%.1f");
-		ImGui::SliderAngle("Theta", &theta, -180.0f, 180.0f);
-		ImGui::SliderAngle("Phi", &phi, -89.0f, 89.0f);
+		ImGui::SliderFloat("X", &m_Pos.x, -80.0f, 80.0f, "%.1f");
+		ImGui::SliderFloat("Y", &m_Pos.y, -80.0f, 80.0f, "%.1f");
+		ImGui::SliderFloat("Z", &m_Pos.z, -80.0f, 80.0f, "%.1f");
+
 		ImGui::Text("Orientation");
-		ImGui::SliderAngle("Pitch", &pitch, -180.0f, 180.0f);
-		ImGui::SliderAngle("Yaw", &yaw, -180.0f, 180.0f);
-		ImGui::SliderAngle("Roll", &roll, -180.0f, 180.0f);
+		ImGui::SliderAngle("Pitch", &m_Pitch, -180.0f, 180.0f);
+		ImGui::SliderAngle("Yaw", &m_Yaw, -180.0f, 180.0f);
+
 		if (ImGui::Button("Reset"))
-		{
 			Reset();
-		}
 	}
 	ImGui::End();
 }
 
 void Camera::Reset() noexcept
 {
-	r = 20.0f;
-	theta = 0.0f;
-	phi = 0.0f;
-	pitch = 0.0f;
-	yaw = 0.0f;
-	roll = 0.0f;
+	m_Pos = { 0.0f, 7.5f, -18.0f };
+	m_Pitch = m_Yaw = 0.0f;
+}
+
+void Camera::Rotate(float dx, float dy) noexcept
+{
+	m_Yaw = wrap_angle(m_Yaw + dx * s_RotationSpeed);
+	m_Pitch = std::clamp(m_Pitch + dy * s_RotationSpeed, -PI / 2.0f, PI / 2.0f);
+}
+
+void Camera::Translate(DirectX::XMFLOAT3 translation) noexcept
+{
+	dx::XMStoreFloat3(&translation, dx::XMVector3Transform(
+		dx::XMLoadFloat3(&translation),
+		dx::XMMatrixRotationRollPitchYaw(m_Pitch, m_Yaw, 0.0f) *
+		dx::XMMatrixScaling(s_TravelSpeed, s_TravelSpeed, s_TravelSpeed)
+	));
+
+	m_Pos =
+	{
+		m_Pos.x + translation.x,
+		m_Pos.y + translation.y,
+		m_Pos.z + translation.z
+	};
 }

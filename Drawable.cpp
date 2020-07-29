@@ -4,7 +4,7 @@
 #include <typeinfo>
 #include <iostream>
 
-void Drawable::Draw(Graphics& gfx) const noexcept(!IS_DEBUG)
+void Drawable::Draw(Graphics& gfx) const noxnd
 {
 	for (auto& b : m_Binds)
 		b->Bind(gfx);
@@ -13,13 +13,13 @@ void Drawable::Draw(Graphics& gfx) const noexcept(!IS_DEBUG)
 	gfx.DrawIndexed(m_pIndexBuffer->GetCount());
 }
 
-void Drawable::AddBind(std::unique_ptr<Bindable> bind) noexcept(!IS_DEBUG)
+void Drawable::AddBind(std::unique_ptr<Bind::Bindable> bind) noxnd
 {
-	assert("Must use AddIndexBuffer to bind index buffer" && typeid(*bind) != typeid(IndexBuffer));
+	assert("Must use AddIndexBuffer to bind index buffer" && typeid(*bind) != typeid(Bind::IndexBuffer));
 	m_Binds.push_back(std::move(bind));
 }
 
-void Drawable::AddIndexBuffer(std::unique_ptr<IndexBuffer> indexBuffer) noexcept
+void Drawable::AddIndexBuffer(std::unique_ptr<Bind::IndexBuffer> indexBuffer) noexcept
 {
 	assert("Attempting to add index buffer for a second time" && m_pIndexBuffer == nullptr);
 	m_pIndexBuffer = indexBuffer.get();

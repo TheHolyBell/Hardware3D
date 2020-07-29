@@ -8,9 +8,14 @@
 #include <vector>
 #include <string>
 
+namespace Bind
+{
+	class Bindable;
+}
+
 class Graphics
 {
-	friend class Bindable;
+	friend class Bind::Bindable;
 public:
 	class Exception : public ChiliException
 	{
