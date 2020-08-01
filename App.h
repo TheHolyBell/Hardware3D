@@ -9,6 +9,7 @@
 #include <set>
 #include <optional>
 #include "Mesh.h"
+#include "TestPlane.h"
 
 class App
 {
@@ -23,7 +24,6 @@ private:
 	Window m_Window;
 	Camera m_Camera;
 	Timer m_Timer;
-	std::unique_ptr<Model> m_Model;
 	PointLight m_Light;
 	struct
 	{
@@ -35,4 +35,6 @@ private:
 		float z = 0.0f;
 	} m_Pos;
 	int x = 0, y = 0;
+	Model m_Wall{ m_Window.Gfx(),"Models\\brick_wall\\brick_wall.obj" };
+	TestPlane m_TestPlane{ m_Window.Gfx(),1.0 };
 };

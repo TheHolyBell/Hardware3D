@@ -12,34 +12,36 @@ namespace Bind
 
 class Drawable
 {
-	template<typename T>
-	friend class DrawableBase;
 public:
 	Drawable() = default;
-	
+
 	Drawable(const Drawable& rhs) = delete;
+	Drawable& operator=(const Drawable& rhs) = delete;
+
+	Drawable(Drawable&& rhs) = delete;
+	Drawable& operator=(Drawable&& rhs) = delete;
 
 	virtual ~Drawable() = default;
 
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
+
 	void Draw(Graphics& gfx) const noxnd;
-	virtual void Update(float dt) noexcept{}
+
 protected:
-	template<class T>
+	template<typename T>
 	T* QueryBindable() noexcept
 	{
 		for (auto& pb : m_Binds)
 		{
 			if (auto pt = dynamic_cast<T*>(pb.get()))
+			{
 				return pt;
+			}
 		}
 		return nullptr;
 	}
-	void AddBind(std::unique_ptr<Bind::Bindable> bind) noxnd;
-	void AddIndexBuffer(std::unique_ptr<Bind::IndexBuffer> indexBuffer) noexcept;
-private:
-	virtual const std::vector<std::unique_ptr<Bind::Bindable>>& GetStaticBinds() const noexcept = 0;
+	void AddBind(std::shared_ptr<Bind::Bindable> pBind) noxnd;
 private:
 	const Bind::IndexBuffer* m_pIndexBuffer = nullptr;
-	std::vector<std::unique_ptr<Bind::Bindable>> m_Binds;
+	std::vector<std::shared_ptr<Bind::Bindable>> m_Binds;
 };

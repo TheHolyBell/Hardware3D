@@ -30,6 +30,15 @@ namespace Dynamic
 		}
 		return desc;
 	}
+	std::string VertexLayout::GetCode() const noxnd
+	{
+		std::string code;
+		for (const auto& e : elements)
+		{
+			code += e.GetCode();
+		}
+		return code;
+	}
 
 
 	// VertexLayout::Element
@@ -62,6 +71,10 @@ namespace Dynamic
 			return sizeof(Map<Texture2D>::SysType);
 		case Normal:
 			return sizeof(Map<Normal>::SysType);
+		case Tangent:
+			return sizeof(Map<Tangent>::SysType);
+		case Bitangent:
+			return sizeof(Map<Bitangent>::SysType);
 		case Float3Color:
 			return sizeof(Map<Float3Color>::SysType);
 		case Float4Color:
@@ -76,6 +89,32 @@ namespace Dynamic
 	{
 		return type;
 	}
+	const char* VertexLayout::Element::GetCode() const noexcept
+	{
+		switch (type)
+		{
+		case Position2D:
+			return Map<Position2D>::code;
+		case Position3D:
+			return Map<Position3D>::code;
+		case Texture2D:
+			return Map<Texture2D>::code;
+		case Normal:
+			return Map<Normal>::code;
+		case Tangent:
+			return Map<Tangent>::code;
+		case Bitangent:
+			return Map<Bitangent>::code;
+		case Float3Color:
+			return Map<Float3Color>::code;
+		case Float4Color:
+			return Map<Float4Color>::code;
+		case BGRAColor:
+			return Map<BGRAColor>::code;
+		}
+		assert("Invalid element type" && false);
+		return "Invalid";
+	}
 	D3D11_INPUT_ELEMENT_DESC VertexLayout::Element::GetDesc() const noxnd
 	{
 		switch (type)
@@ -88,6 +127,10 @@ namespace Dynamic
 			return GenerateDesc<Texture2D>(GetOffset());
 		case Normal:
 			return GenerateDesc<Normal>(GetOffset());
+		case Tangent:
+			return GenerateDesc<Tangent>(GetOffset());
+		case Bitangent:
+			return GenerateDesc<Bitangent>(GetOffset());
 		case Float3Color:
 			return GenerateDesc<Float3Color>(GetOffset());
 		case Float4Color:
@@ -115,10 +158,20 @@ namespace Dynamic
 
 
 	// VertexBuffer
-	VertexBuffer::VertexBuffer(VertexLayout layout) noxnd
+	VertexBuffer::VertexBuffer(VertexLayout layout, size_t size) noxnd
 		:
 	layout(std::move(layout))
-	{}
+	{
+		Resize(size);
+	}
+	void VertexBuffer::Resize(size_t newSize) noxnd
+	{
+		const auto size = Size();
+		if (size < newSize)
+		{
+			buffer.resize(buffer.size() + layout.Size() * (newSize - size));
+		}
+	}
 	const char* VertexBuffer::GetData() const noxnd
 	{
 		return buffer.data();

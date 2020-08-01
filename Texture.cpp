@@ -1,40 +1,69 @@
 #include "Texture.h"
 #include "Surface.h"
 #include "GraphicsThrowMacros.h"
+#include "BindableCodex.h"
 
 namespace Bind
 {
-	Texture::Texture(Graphics& gfx, const Surface& s, UINT slot)
-		: m_Slot(slot)
+	namespace wrl = Microsoft::WRL;
+
+	Texture::Texture(Graphics& gfx, const std::string& path, UINT slot)
+		:
+		m_Path(path),
+		m_Slot(slot)
 	{
 		INFOMAN(gfx);
 
-		// Create texture resource
-		D3D11_TEXTURE2D_DESC _textureDesc = {};
-		_textureDesc.Width = s.GetWidth();
-		_textureDesc.Height = s.GetHeight();
-		_textureDesc.MipLevels = 1;
-		_textureDesc.ArraySize = 1;
-		_textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		_textureDesc.SampleDesc.Count = 1;
-		_textureDesc.SampleDesc.Quality = 0;
-		_textureDesc.Usage = D3D11_USAGE_DEFAULT;
-		_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		// load surface
+		const auto s = Surface::FromFile(path);
 
-		D3D11_SUBRESOURCE_DATA _initData = {};
-		_initData.pSysMem = s.GetBufferPtr();
-		_initData.SysMemPitch = s.GetWidth() * sizeof(::Surface::Color);
+		// create texture resource
+		D3D11_TEXTURE2D_DESC textureDesc = {};
+		textureDesc.Width = s.GetWidth();
+		textureDesc.Height = s.GetHeight();
+		textureDesc.MipLevels = 1;
+		textureDesc.ArraySize = 1;
+		textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		textureDesc.SampleDesc.Count = 1;
+		textureDesc.SampleDesc.Quality = 0;
+		textureDesc.Usage = D3D11_USAGE_DEFAULT;
+		textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		textureDesc.CPUAccessFlags = 0;
+		textureDesc.MiscFlags = 0;
+		D3D11_SUBRESOURCE_DATA sd = {};
+		sd.pSysMem = s.GetBufferPtr();
+		sd.SysMemPitch = s.GetWidth() * sizeof(Surface::Color);
+		wrl::ComPtr<ID3D11Texture2D> pTexture;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateTexture2D(
+			&textureDesc, &sd, &pTexture
+		));
 
-		Microsoft::WRL::ComPtr<ID3D11Texture2D> _pTexture;
-		GFX_THROW_INFO(GetDevice(gfx)->CreateTexture2D(&_textureDesc,
-			&_initData, &_pTexture));
-
-		GFX_THROW_INFO(GetDevice(gfx)->CreateShaderResourceView(_pTexture.Get(),
-			nullptr, &m_pTextureView));
+		// create the resource view on the texture
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = textureDesc.Format;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = 1;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateShaderResourceView(
+			pTexture.Get(), &srvDesc, &m_pTextureView
+		));
 	}
 
 	void Texture::Bind(Graphics& gfx) noexcept
 	{
-		GetContext(gfx)->PSSetShaderResources(m_Slot, 1, m_pTextureView.GetAddressOf());
+		GetContext(gfx)->PSSetShaderResources(m_Slot, 1u, m_pTextureView.GetAddressOf());
+	}
+	std::shared_ptr<Texture> Texture::Resolve(Graphics& gfx, const std::string& path, UINT slot)
+	{
+		return Codex::Resolve<Texture>(gfx, path, slot);
+	}
+	std::string Texture::GenerateUID(const std::string& path, UINT slot)
+	{
+		using namespace std::string_literals;
+		return typeid(Texture).name() + "#"s + path + "#" + std::to_string(slot);
+	}
+	std::string Texture::GetUID() const noexcept
+	{
+		return GenerateUID(m_Path, m_Slot);
 	}
 }

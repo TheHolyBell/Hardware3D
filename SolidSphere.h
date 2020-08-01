@@ -1,16 +1,13 @@
 #pragma once
-#include "DrawableBase.h"
+#include "Drawable.h"
 
-class SolidSphere : public DrawableBase<SolidSphere>
+class SolidSphere : public Drawable
 {
 public:
 	SolidSphere(Graphics& gfx, float radius);
-
-	virtual void Update(float dt) noexcept override;
-	virtual DirectX::XMMATRIX GetTransformXM() const noexcept override;
-
 	void SetPos(DirectX::XMFLOAT3 pos) noexcept;
 
+	virtual DirectX::XMMATRIX GetTransformXM() const noexcept override;
 private:
-	DirectX::XMFLOAT3 m_Position = { 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT3 m_Pos = { 1.0f, 1.0f, 1.0f };
 };

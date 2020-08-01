@@ -2,26 +2,23 @@
 #include "IndexBuffer.h"
 #include <cassert>
 #include <typeinfo>
-#include <iostream>
+
+using namespace Bind;
 
 void Drawable::Draw(Graphics& gfx) const noxnd
 {
-	for (auto& b : m_Binds)
-		b->Bind(gfx);
-	for (auto& b : GetStaticBinds())
-		b->Bind(gfx);
+	for (const auto& pb : m_Binds)
+		pb->Bind(gfx);
 	gfx.DrawIndexed(m_pIndexBuffer->GetCount());
 }
 
-void Drawable::AddBind(std::unique_ptr<Bind::Bindable> bind) noxnd
+void Drawable::AddBind(std::shared_ptr<Bindable> pBind) noxnd
 {
-	assert("Must use AddIndexBuffer to bind index buffer" && typeid(*bind) != typeid(Bind::IndexBuffer));
-	m_Binds.push_back(std::move(bind));
-}
-
-void Drawable::AddIndexBuffer(std::unique_ptr<Bind::IndexBuffer> indexBuffer) noexcept
-{
-	assert("Attempting to add index buffer for a second time" && m_pIndexBuffer == nullptr);
-	m_pIndexBuffer = indexBuffer.get();
-	m_Binds.push_back(std::move(indexBuffer));
+	// Special case for index buffer
+	if (typeid(*pBind) == typeid(IndexBuffer))
+	{
+		assert(m_pIndexBuffer == nullptr && "Binding multiple index buffer is not allowed");
+		m_pIndexBuffer = &static_cast<IndexBuffer&>(*pBind);
+	}
+	m_Binds.push_back(std::move(pBind));
 }

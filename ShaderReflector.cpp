@@ -77,6 +77,16 @@ Dynamic::VertexLayout ShaderReflector::GetLayoutFromShader(ID3DBlob* shaderByteC
             else if (Format == DXGI_FORMAT_R32G32B32A32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Float4Color);
         }
+        else if (_SemanticName == "BITANGENT")
+        {
+            if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
+                _vertexLayout.Append(VertexLayout::Bitangent);
+        }
+        else if (_SemanticName == "TANGENT")
+        {
+            if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
+                _vertexLayout.Append(VertexLayout::Tangent);
+        }
 	}
 
 	return _vertexLayout;

@@ -9,6 +9,7 @@
 
 #include "Vertex.h"
 #include <iostream>
+#include "BindableCommon.h"
 #include "ShaderReflector.h"
 #include "BindableCommon.h"
 
@@ -22,7 +23,8 @@ namespace dx = DirectX;
 App::App(int Width, int Height, const std::string& title)
 	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx())
 {
-	m_Model = std::make_unique<Model>(m_Window.Gfx(), "Models\\nano_textured\\nanosuit.obj");
+	m_Wall.SetRootTransform(dx::XMMatrixTranslation(-1.5f, 0.0f, 0.0f));
+	m_TestPlane.SetPos({ 1.5f, 0.0f, 0.0f });
 }
 
 int App::Go()
@@ -54,7 +56,8 @@ void App::DoFrame()
 	gfx.SetCamera(m_Camera.GetMatrix());
 	m_Light.Bind(gfx, gfx.GetCamera());
 
-	m_Model->Draw(gfx);
+	m_Wall.Draw(gfx);
+	m_TestPlane.Draw(gfx);
 	m_Light.Draw(gfx);
 
 	while (const auto e = m_Window.g_Keyboard.ReadKey())
@@ -91,7 +94,7 @@ void App::DoFrame()
 			m_Camera.Translate({ dt,0.0f,0.0f });
 		if (m_Window.g_Keyboard.KeyIsPressed(VK_SPACE))
 			m_Camera.Translate({ 0.0f,dt,0.0f });
-		if (m_Window.g_Keyboard.KeyIsPressed(VK_LSHIFT))
+		if (m_Window.g_Keyboard.KeyIsPressed(VK_SHIFT))
 			m_Camera.Translate({ 0.0f,-dt,0.0f });
 	}
 
@@ -102,6 +105,7 @@ void App::DoFrame()
 	}
 
 	ShowModelWindow();
+	m_TestPlane.SpawnControlWindow(gfx);
 	m_Camera.SpawnControlWindow();
 	m_Light.SpawnControlWindow();
 
@@ -110,5 +114,5 @@ void App::DoFrame()
 
 void App::ShowModelWindow()
 {
-	m_Model->ShowWindow();
+	m_Wall.ShowWindow();
 }
