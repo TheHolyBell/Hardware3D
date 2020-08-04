@@ -7,7 +7,7 @@ PointLight::PointLight(Graphics& gfx, float radius)
 	Reset();
 }
 
-void PointLight::SpawnControlWindow() noexcept
+void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
 {
 	if (ImGui::Begin("Light"))
 	{
@@ -26,6 +26,12 @@ void PointLight::SpawnControlWindow() noexcept
 		ImGui::SliderFloat("Linear", &m_cbData.attLin, 0.0001f, 4.0f, "%.4f", 8);
 		ImGui::SliderFloat("Quadratic", &m_cbData.attQuad, 0.0000001f, 10.0f, "%.7f", 10);
 
+		ImGui::Checkbox("Gizmo", &m_bGuizmoEnabled);
+
+		if (m_bGuizmoEnabled)
+			m_Mesh.RenderGizmo(gfx);
+
+		m_cbData.pos = m_Mesh.GetPos();
 		if (ImGui::Button("Reset"))
 		{
 			Reset();
@@ -37,7 +43,7 @@ void PointLight::SpawnControlWindow() noexcept
 void PointLight::Reset() noexcept
 {
 	m_cbData = {
-		{ 1.5f,14.0f,-4.5f },
+		{ 2.0f,9.0f,-17.0f },
 		{ 0.05f,0.05f,0.05f },
 		{ 1.0f,1.0f,1.0f },
 		1.0f,

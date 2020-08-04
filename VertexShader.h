@@ -10,7 +10,7 @@ namespace Bind
 		VertexShader(Graphics& gfx, const std::string& path);
 		
 		ID3DBlob* GetByteCode() const noexcept;
-		
+
 		static std::shared_ptr<VertexShader> Resolve(Graphics& gfx, const std::string& path);
 		static std::string GenerateUID(const std::string& path);
 

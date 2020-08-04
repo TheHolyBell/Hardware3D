@@ -7,6 +7,7 @@
 #include "ImGui\imgui_impl_win32.h"
 #include "ImGui\imgui_impl_dx11.h"
 
+#include "ChiliUtil.h"
 #include "Vertex.h"
 #include <iostream>
 #include "BindableCommon.h"
@@ -20,11 +21,10 @@ GDIPlusManager g_GDIPlusManager;
 namespace dx = DirectX;
 
 
-App::App(int Width, int Height, const std::string& title)
-	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx())
+App::App(int Width, int Height, const std::string& title, const std::string& commandLine)
+	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx()),
+	m_CommandLine(commandLine), m_ScriptCommander(TokenizeQuoted(commandLine))
 {
-	m_Wall.SetRootTransform(dx::XMMatrixTranslation(-1.5f, 0.0f, 0.0f));
-	m_TestPlane.SetPos({ 1.5f, 0.0f, 0.0f });
 }
 
 int App::Go()
@@ -56,9 +56,12 @@ void App::DoFrame()
 	gfx.SetCamera(m_Camera.GetMatrix());
 	m_Light.Bind(gfx, gfx.GetCamera());
 
+	m_Gobber.Draw(gfx);
 	m_Wall.Draw(gfx);
-	m_TestPlane.Draw(gfx);
+	m_Nano.Draw(gfx);
+	m_Sponza.Draw(gfx);
 	m_Light.Draw(gfx);
+	m_TestPlane.Draw(gfx);
 
 	while (const auto e = m_Window.g_Keyboard.ReadKey())
 	{
@@ -104,15 +107,16 @@ void App::DoFrame()
 			m_Camera.Rotate(delta->x, delta->y);
 	}
 
-	ShowModelWindow();
-	m_TestPlane.SpawnControlWindow(gfx);
+	m_Gobber.ShowWindow(gfx, "Gobber");
+	m_Wall.ShowWindow(gfx, "Wall");
+	m_Nano.ShowWindow(gfx, "Nanosuit");
+	m_Sponza.ShowWindow(gfx, "Sponza");
+	m_TestPlane.SpawnControlWindow(gfx, "TestPlane");
+	
+	
+
 	m_Camera.SpawnControlWindow();
-	m_Light.SpawnControlWindow();
+	m_Light.SpawnControlWindow(gfx);
 
 	gfx.EndFrame();
-}
-
-void App::ShowModelWindow()
-{
-	m_Wall.ShowWindow();
 }

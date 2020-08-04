@@ -17,7 +17,7 @@ VSOut main(float3 pos : POSITION, float3 n : NORMAL, float2 texCoord : TEXCOORD)
 	VSOut vso;
 
 	vso.PosW = mul(float4(pos, 1.0f), modelView);
-	vso.Normal = mul(n, (float3x3)modelView);
+	vso.Normal = normalize(mul(n, (float3x3)modelView));
 	vso.TexCoords = texCoord;
 	vso.PosH = mul(float4(pos, 1.0f), modelViewProjection);
 

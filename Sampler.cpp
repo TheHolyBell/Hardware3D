@@ -14,6 +14,7 @@ namespace Bind
 		_sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		_sampDesc.MaxAnisotropy = 16;
 		_sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		_sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 		GFX_THROW_INFO(GetDevice(gfx)->CreateSamplerState(&_sampDesc, &m_pSampler));
 	}

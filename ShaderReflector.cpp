@@ -5,6 +5,22 @@
 #include <string>
 #include <iostream>
 
+static bool icompare_pred(unsigned char a, unsigned char b)
+{
+    return std::tolower(a) == std::tolower(b);
+}
+
+static bool icompare(const std::string& a, const std::string& b)
+{
+    if (a.length() == b.length()) {
+        return std::equal(b.begin(), b.end(),
+            a.begin(), icompare_pred);
+    }
+    else {
+        return false;
+    }
+}
+
 Dynamic::VertexLayout ShaderReflector::GetLayoutFromShader(ID3DBlob* shaderByteCode)
 {
 	using Dynamic::VertexLayout;
@@ -53,36 +69,36 @@ Dynamic::VertexLayout ShaderReflector::GetLayoutFromShader(ID3DBlob* shaderByteC
             else if (_inputParameterDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
         }
 
-        if (_SemanticName == "POSITION")
+        if (icompare(_SemanticName,"POSITION"))
         {
             if (Format == DXGI_FORMAT_R32G32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Position2D);
             else if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Position3D);
         }
-        else if (_SemanticName == "NORMAL")
+        else if (icompare(_SemanticName,"NORMAL"))
         {
             if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Normal);
         }
-        else if (_SemanticName == "TEXCOORD")
+        else if (icompare(_SemanticName,"TEXCOORD"))
         {
             if (Format == DXGI_FORMAT_R32G32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Texture2D);
         }
-        else if (_SemanticName == "COLOR")
+        else if (icompare(_SemanticName,"COLOR"))
         {
             if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Float3Color);
             else if (Format == DXGI_FORMAT_R32G32B32A32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Float4Color);
         }
-        else if (_SemanticName == "BITANGENT")
+        else if (icompare(_SemanticName,"BITANGENT"))
         {
             if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Bitangent);
         }
-        else if (_SemanticName == "TANGENT")
+        else if (icompare(_SemanticName,"TANGENT"))
         {
             if (Format == DXGI_FORMAT_R32G32B32_FLOAT)
                 _vertexLayout.Append(VertexLayout::Tangent);

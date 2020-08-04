@@ -7,6 +7,7 @@
 #include "GraphicsThrowMacros.h"
 #include "ImGui\imgui_impl_dx11.h"
 #include "ImGui\imgui_impl_win32.h"
+#include "ImGui\ImGuizmo.h"
 #include <iostream>
 
 #pragma comment(lib,"d3d11.lib")
@@ -77,6 +78,7 @@ void Graphics::BeginFrame(float red, float green, float blue) noexcept
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 }
 
@@ -179,7 +181,7 @@ void Graphics::OnResize(int Width, int Height)
 
 	m_pImmediateContext->RSSetViewports(1, &vp);
 
-	m_Projection = DirectX::XMMatrixPerspectiveLH(1.0f, (float)Height / (float)Width, 0.5f, 40.0f);
+	m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, (float)Width / (float)Height, 1.0f, 3000.0f);
 	std::cout << "Window resized. New dimensions: [" << Width << ";" << Height << "]\n";
 
 	m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), m_pDSV.Get());

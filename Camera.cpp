@@ -20,6 +20,11 @@ DirectX::XMMATRIX Camera::GetMatrix() const noexcept
 	return translation * rotation;
 }
 
+DirectX::XMFLOAT3 Camera::GetPos() const noexcept
+{
+	return m_Pos;
+}
+
 void Camera::SpawnControlWindow() noexcept
 {
 	if (ImGui::Begin("Camera"))
@@ -41,8 +46,9 @@ void Camera::SpawnControlWindow() noexcept
 
 void Camera::Reset() noexcept
 {
-	m_Pos = { 0.0f,0.0f,-10.0f };
-	m_Pitch = m_Yaw = 0.0f;
+	m_Pos = { -13.5f,6.0f,3.5f };
+	m_Pitch = 0.0f;
+	m_Yaw = PI / 2;
 }
 
 void Camera::Rotate(float dx, float dy) noexcept

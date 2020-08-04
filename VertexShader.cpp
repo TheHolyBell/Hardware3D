@@ -1,6 +1,7 @@
 #include "VertexShader.h"
 #include "GraphicsThrowMacros.h"
 #include "BindableCodex.h"
+#include "ShaderReflector.h"
 
 #include <d3dcompiler.h>
 
@@ -34,6 +35,7 @@ namespace Bind
 	{
 		return m_pByteCode.Get();
 	}
+
 	std::shared_ptr<VertexShader> VertexShader::Resolve(Graphics& gfx, const std::string& path)
 	{
 		return Codex::Resolve<VertexShader>(gfx, path);

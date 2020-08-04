@@ -8,6 +8,7 @@ namespace Gdiplus
 }
 #include <gdiplus.h>
 #include <sstream>
+#include "ScriptCommander.h"
 
 #pragma comment(lib, "gdiplus.lib")
 
@@ -18,34 +19,40 @@ Surface Surface::FromFile(const std::string& filename)
 	unsigned int height = 0;
 	std::unique_ptr<Color[]> pBuffer;
 
+	bool alphaLoaded = false;
 	{
-		// Convert filename to wide string (for GdiPlus)
-		std::wstring _wideName(filename.begin(), filename.end());
+		// convert filenam to wide string (for Gdiplus)
+		wchar_t wideName[512];
+		mbstowcs_s(nullptr, wideName, filename.c_str(), _TRUNCATE);
 
-		Gdiplus::Bitmap _Bitmap(_wideName.c_str());
-		if (_Bitmap.GetLastStatus() != Gdiplus::Status::Ok)
+		Gdiplus::Bitmap bitmap(wideName);
+		if (bitmap.GetLastStatus() != Gdiplus::Status::Ok)
 		{
 			std::stringstream ss;
 			ss << "Loading image [" << filename << "]: failed to load.";
 			throw Exception(__LINE__, __FILE__, ss.str());
 		}
 
-		width = _Bitmap.GetWidth();
-		height = _Bitmap.GetHeight();
+		width = bitmap.GetWidth();
+		height = bitmap.GetHeight();
 		pBuffer = std::make_unique<Color[]>(width * height);
 
-		for (int y = 0; y < height; ++y)
+		for (unsigned int y = 0; y < height; y++)
 		{
-			for (int x = 0; x < width; ++x)
+			for (unsigned int x = 0; x < width; x++)
 			{
 				Gdiplus::Color c;
-				_Bitmap.GetPixel(x, y, &c);
+				bitmap.GetPixel(x, y, &c);
 				pBuffer[y * width + x] = c.GetValue();
+				if (c.GetAlpha() != 255)
+				{
+					alphaLoaded = true;
+				}
 			}
 		}
 	}
 
-	return Surface(width, height, std::move(pBuffer));
+	return Surface(width, height, std::move(pBuffer), alphaLoaded);
 }
 
 Surface::Surface(unsigned int width, unsigned int height) noexcept
@@ -190,8 +197,14 @@ void Surface::Copy(const Surface& src) noexcept(!IS_DEBUG)
 	memcpy(m_pBuffer.get(), src.m_pBuffer.get(), m_Width * m_Height * sizeof(Color));
 }
 
-Surface::Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam) noexcept
-	: m_Width(width), m_Height(height), m_pBuffer(std::move(pBufferParam))
+bool Surface::AlphaLoaded() const noexcept
+{
+	return m_bAlphaLoaded;
+}
+
+Surface::Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam, bool alphaLoaded) noexcept
+	: m_Width(width), m_Height(height), m_pBuffer(std::move(pBufferParam)),
+	m_bAlphaLoaded(alphaLoaded)
 {
 }
 
@@ -200,6 +213,7 @@ Surface::Exception::Exception(int line, const char* file, const std::string& not
 	m_Note(std::move(note))
 {
 }
+
 
 const char* Surface::Exception::what() const noexcept
 {

@@ -2,6 +2,7 @@
 #include "Surface.h"
 #include "GraphicsThrowMacros.h"
 #include "BindableCodex.h"
+#include "WICTextureLoader.h"
 
 namespace Bind
 {
@@ -14,8 +15,9 @@ namespace Bind
 	{
 		INFOMAN(gfx);
 
-		// load surface
+		/*// load surface
 		const auto s = Surface::FromFile(path);
+		m_bHasAlpha = s.AlphaLoaded();
 
 		// create texture resource
 		D3D11_TEXTURE2D_DESC textureDesc = {};
@@ -46,7 +48,18 @@ namespace Bind
 		srvDesc.Texture2D.MipLevels = 1;
 		GFX_THROW_INFO(GetDevice(gfx)->CreateShaderResourceView(
 			pTexture.Get(), &srvDesc, &m_pTextureView
-		));
+		));*/
+
+		Microsoft::WRL::ComPtr<ID3D11Resource> _pTexture;
+
+		DirectX::CreateWICTextureFromFile(GetDevice(gfx), GetContext(gfx), std::wstring(path.begin(), path.end()).c_str() ,&_pTexture, &m_pTextureView);
+		GetContext(gfx)->GenerateMips(m_pTextureView.Get());
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC _srvDesc = {};
+
+		m_pTextureView->GetDesc(&_srvDesc);
+		if (_srvDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM || _srvDesc.Format == DXGI_FORMAT_B8G8R8A8_UNORM)
+			m_bHasAlpha = true;
 	}
 
 	void Texture::Bind(Graphics& gfx) noexcept
@@ -61,6 +74,10 @@ namespace Bind
 	{
 		using namespace std::string_literals;
 		return typeid(Texture).name() + "#"s + path + "#" + std::to_string(slot);
+	}
+	bool Texture::HasAlpha() const noexcept
+	{
+		return m_bHasAlpha;
 	}
 	std::string Texture::GetUID() const noexcept
 	{

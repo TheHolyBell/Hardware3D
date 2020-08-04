@@ -8,7 +8,7 @@ class PointLight
 public:
 	PointLight(Graphics& gfx, float radius = 0.5f);
 
-	void SpawnControlWindow() noexcept;
+	void SpawnControlWindow(Graphics& gfx) noexcept;
 	void Reset() noexcept;
 	void Draw(Graphics& gfx) const noexcept(!IS_DEBUG);
 	void Bind(Graphics& gfx, DirectX::FXMMATRIX view) const noexcept;
@@ -24,6 +24,7 @@ private:
 		float attQuad;
 	};
 private:
+	bool m_bGuizmoEnabled = false;
 	PointLightCBuf m_cbData;
 	mutable SolidSphere m_Mesh;
 	mutable Bind::PixelConstantBuffer<PointLightCBuf> m_CBuffer;
