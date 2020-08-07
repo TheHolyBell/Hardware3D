@@ -4,6 +4,8 @@
 #include "ShaderReflector.h"
 
 #include <d3dcompiler.h>
+#include <iostream>
+#include <filesystem>
 
 namespace Bind
 {
@@ -11,6 +13,9 @@ namespace Bind
 		: m_Path(path)
 	{
 		INFOMAN(gfx);
+
+		if (!std::filesystem::exists(path))
+			std::cout << path << " " << "Doesn't exits" << std::endl;
 
 		GFX_THROW_INFO(D3DReadFileToBlob(std::wstring(path.begin(), path.end()).c_str(), &m_pByteCode));
 		GFX_THROW_INFO(GetDevice(gfx)->CreateVertexShader(

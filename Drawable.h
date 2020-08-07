@@ -3,45 +3,42 @@
 #include <DirectXMath.h>
 #include <memory>
 #include "ConditionalNoexcept.h"
+#include "Technique.h"
+
+class TechniqueProbe;
+class Material;
+struct aiMesh;
 
 namespace Bind
 {
 	class Bindable;
 	class IndexBuffer;
+	class Topology;
+	class InputLayout;
+	class VertexBuffer;
 }
 
 class Drawable
 {
 public:
 	Drawable() = default;
-
+	
 	Drawable(const Drawable& rhs) = delete;
 	Drawable& operator=(const Drawable& rhs) = delete;
 
-	Drawable(Drawable&& rhs) = delete;
-	Drawable& operator=(Drawable&& rhs) = delete;
+	Drawable(Graphics& gfx, const Material& mat, const aiMesh& mesh, float scale = 1.0f) noexcept;
 
-	virtual ~Drawable() = default;
+	void AddTechnique(Technique tech) noexcept;
+	void Submit(class FrameCommander& frame) const noexcept;
+	void Bind(Graphics& gfx) const noexcept;
+	void Accept(TechniqueProbe& probe);
+	UINT GetIndexCount() const noxnd;
+	virtual ~Drawable();
 
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
-
-	void Draw(Graphics& gfx) const noxnd;
-
-	template<typename T>
-	T* QueryBindable() noexcept
-	{
-		for (auto& pb : m_Binds)
-		{
-			if (auto pt = dynamic_cast<T*>(pb.get()))
-			{
-				return pt;
-			}
-		}
-		return nullptr;
-	}
 protected:
-	void AddBind(std::shared_ptr<Bind::Bindable> pBind) noxnd;
-private:
-	const Bind::IndexBuffer* m_pIndexBuffer = nullptr;
-	std::vector<std::shared_ptr<Bind::Bindable>> m_Binds;
+	std::shared_ptr<Bind::IndexBuffer> m_pIndices;
+	std::shared_ptr<Bind::VertexBuffer> m_pVertices;
+	std::shared_ptr<Bind::Topology> m_pTopology;
+	std::vector<Technique> m_Techniques;
 };

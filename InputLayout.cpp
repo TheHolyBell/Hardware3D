@@ -41,4 +41,8 @@ namespace Bind
 	{
 		return GenerateUID(m_Layout);
 	}
+	const Dynamic::VertexLayout InputLayout::GetLayout() const noexcept
+	{
+		return m_Layout;
+	}
 }

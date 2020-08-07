@@ -3,6 +3,7 @@
 #include "GraphicsThrowMacros.h"
 #include "Sphere.h"
 #include "Vertex.h"
+#include "Stencil.h"
 #include "ImGui\imgui.h"
 #include "ImGui\ImGuizmo.h"
 
@@ -13,32 +14,39 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 
 	auto model = Sphere::Make();
 	model.Transform(dx::XMMatrixScaling(radius, radius, radius));
-
 	const auto geometryTag = "$sphere." + std::to_string(radius);
-	AddBind(VertexBuffer::Resolve(gfx, geometryTag, model.vertices));
-	AddBind(IndexBuffer::Resolve(gfx, geometryTag, model.indices));
+	m_pVertices = VertexBuffer::Resolve(gfx, geometryTag, model.vertices);
+	m_pIndices = IndexBuffer::Resolve(gfx, geometryTag, model.indices);
+	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	auto pvs = VertexShader::Resolve(gfx, "SolidVS.cso");
-	auto pvsbc = pvs->GetByteCode();
-	AddBind(std::move(pvs));
-
-	AddBind(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
-
-	AddBind(PixelShader::Resolve(gfx, "SolidPS.cso"));
-
-	struct PSColorConstant
 	{
-		alignas(16) dx::XMFLOAT3 color = { 1.0f,1.0f,1.0f };
-	} colorConst;
-	AddBind(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConst, 1));
+		Technique solid;
+		Step only{ 0 };
 
-	AddBind(Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		auto pvs = VertexShader::Resolve(gfx, "Solid_VS.cso");
+		auto pvsbc = pvs->GetByteCode();
+		only.AddBindable(std::move(pvs));
 
-	AddBind(std::make_shared<TransformCbuf>(gfx, *this));
+		only.AddBindable(PixelShader::Resolve(gfx, "Solid_PS.cso"));
 
-	AddBind(Blender::Resolve(gfx, false));
+		struct PSColorConstant
+		{
+			alignas(16) dx::XMFLOAT3 color = { 1.0f, 1.0f, 1.0f };
+		} colorConst;
+		only.AddBindable(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConst, 1));
 
-	AddBind(Rasterizer::Resolve(gfx, false));
+		only.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
+
+		only.AddBindable(std::make_shared<TransformCbuf>(gfx));
+
+		only.AddBindable(Blender::Resolve(gfx, false));
+
+		only.AddBindable(Rasterizer::Resolve(gfx, false));
+
+		solid.AddStep(std::move(only));
+
+		AddTechnique(std::move(solid));
+	}
 
 	DirectX::XMStoreFloat4x4(&m_Transformation, DirectX::XMMatrixTranslation(1.0f, 5.0f, 1.0f));
 }

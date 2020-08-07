@@ -52,6 +52,9 @@
     <Filter Include="WICTextureLoader">
       <UniqueIdentifier>{5d6b79a1-3ed0-4871-8cd1-6777a2aae7fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Render Queue System">
+      <UniqueIdentifier>{d46b9704-1bcd-4898-8a12-f7c7900c5c12}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -107,9 +110,6 @@
     </ClCompile>
     <ClCompile Include="Drawable.cpp">
       <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
-    <ClCompile Include="GDIPlusManager.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sampler.cpp">
       <Filter>Source Files\Bindable</Filter>
@@ -207,6 +207,36 @@
     <ClCompile Include="ScriptCommander.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicConstant.cpp">
+      <Filter>DynamicStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="LayoutCodex.cpp">
+      <Filter>DynamicStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="Step.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="Technique.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="NullPixelShader.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -302,9 +332,6 @@
     <ClInclude Include="Surface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GDIPlusManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sampler.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
@@ -334,9 +361,6 @@
     </ClInclude>
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="ImguiManager.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
@@ -641,6 +665,60 @@
     <ClInclude Include="ScriptCommander.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DynamicConstant.h">
+      <Filter>DynamicStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="LayoutCodex.h">
+      <Filter>DynamicStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffersEx.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Stencil.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Step.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Pass.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Technique.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameCommander.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="NullPixelShader.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="PerfLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TechniqueProbe.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelProbe.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Hardware3D.rc">
@@ -704,55 +782,49 @@
     <None Include="process.json" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
+    <FxCompile Include="Solid_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
+    <FxCompile Include="Solid_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="TextureVS.hlsl">
+    <FxCompile Include="Phong_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="TexturePS.hlsl">
+    <FxCompile Include="Phong_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongVS.hlsl">
+    <FxCompile Include="PhongDif_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPS.hlsl">
+    <FxCompile Include="PhongDif_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SolidVS.hlsl">
+    <FxCompile Include="PhongDifSpc_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SolidPS.hlsl">
+    <FxCompile Include="PhongDifSpc_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="IndexedPhongPS.hlsl">
+    <FxCompile Include="PhongDifSpcNrm_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPSNormalMap.hlsl">
+    <FxCompile Include="PhongDifSpcNrm_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongVSNormalMap.hlsl">
+    <FxCompile Include="PhongDifNrm_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPSSpecNormalMap.hlsl">
+    <FxCompile Include="PhongDifNrm_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPSNormalMapObject.hlsl">
+    <FxCompile Include="PhongDifMskSpcNrm_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongVSNotex.hlsl">
+    <FxCompile Include="PhongDifMskSpcNrm_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PhongPSNotex.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PhongPSSpec.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PhongPSSpecNormMask.hlsl">
+    <FxCompile Include="Offset_VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

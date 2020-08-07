@@ -3,6 +3,9 @@
 #include <sstream>
 #include "Mesh.h"
 #include "ChiliMath.h"
+#include "ModelException.h"
+#include <assimp\scene.h>
+#include <assimp\Importer.hpp>
 
 
 template<typename F>

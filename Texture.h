@@ -17,6 +17,8 @@ namespace Bind
 		static std::string GenerateUID(const std::string& path, UINT slot = 0);
 		bool HasAlpha() const noexcept;
 	private:
+		static UINT CalculateNumberOfMipLevels(UINT width, UINT height) noexcept;
+	private:
 		UINT m_Slot;
 	protected:
 		bool m_bHasAlpha = false;

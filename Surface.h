@@ -5,7 +5,10 @@
 #include <string>
 #include <cassert>
 #include <memory>
+#include <DirectXTex.h>
+#include <optional>
 
+#include "ConditionalNoexcept.h"
 
 class Surface
 {
@@ -31,7 +34,7 @@ public:
 		{}
 		constexpr Color(unsigned char r, unsigned char g, unsigned char b) noexcept
 			:
-			dword((r << 16u) | (g << 8u) | b)
+			dword((255u << 24u) | (r << 16u) | (g << 8u) | b)
 		{}
 		constexpr Color(Color col, unsigned char x) noexcept
 			:
@@ -87,48 +90,36 @@ public:
 	class Exception : public ChiliException
 	{
 	public:
-		Exception(int line, const char* file, const std::string& note) noexcept;
-
-		virtual const char* what() const noexcept override;
-		virtual const char* GetType() const noexcept override;
+		Exception(int line, const char* file, std::string note, std::optional<HRESULT> hr = {}) noexcept;
+		Exception(int line, const char* file, std::string filename, std::string note, std::optional<HRESULT> hr = {}) noexcept;
+		const char* what() const noexcept override;
+		const char* GetType() const noexcept override;
 		const std::string& GetNote() const noexcept;
 	private:
+		std::optional<HRESULT> m_HR;
 		std::string m_Note;
 	};
 public:
-
-	static Surface FromFile(const std::string& filename);
-
-	Surface(unsigned int width, unsigned int height) noexcept;
-	
-	Surface(Surface&& rhs) noexcept;
-	Surface& operator=(Surface&& rhs) noexcept;
-
-	Surface(const Surface& rhs) = delete;
-	Surface& operator=(const Surface& rhs) = delete;
-
-	~Surface();
-
+	Surface(unsigned int width, unsigned int height);
+	Surface(Surface&& source) noexcept = default;
+	Surface(Surface&) = delete;
+	Surface& operator=(Surface&& donor) noexcept = default;
+	Surface& operator=(const Surface&) = delete;
+	~Surface() = default;
 	void Clear(Color fillValue) noexcept;
-	void PutPixel(unsigned int x, unsigned int y, Color c) noexcept(!IS_DEBUG);
-	Color GetPixel(unsigned int x, unsigned int y) const noexcept(!IS_DEBUG);
-
+	void PutPixel(unsigned int x, unsigned int y, Color c) noxnd;
+	Color GetPixel(unsigned int x, unsigned int y) const noxnd;
 	unsigned int GetWidth() const noexcept;
 	unsigned int GetHeight() const noexcept;
-
 	Color* GetBufferPtr() noexcept;
-
 	const Color* GetBufferPtr() const noexcept;
 	const Color* GetBufferPtrConst() const noexcept;
-	
+	static Surface FromFile(const std::string& name);
 	void Save(const std::string& filename) const;
-	void Copy(const Surface& src) noexcept(!IS_DEBUG);
 	bool AlphaLoaded() const noexcept;
 private:
-	Surface(unsigned int width, unsigned int height, std::unique_ptr<Color[]> pBufferParam, bool alphaLoaded = false) noexcept;
+	Surface(DirectX::ScratchImage scratch) noexcept;
 private:
-	std::unique_ptr<Color[]> m_pBuffer;
-	unsigned int m_Width;
-	unsigned int m_Height;
-	bool m_bAlphaLoaded = false;
+	static constexpr DXGI_FORMAT s_Format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+	DirectX::ScratchImage m_Scratch;
 };

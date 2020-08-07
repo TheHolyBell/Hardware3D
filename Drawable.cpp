@@ -1,24 +1,52 @@
 #include "Drawable.h"
-#include "IndexBuffer.h"
-#include <cassert>
-#include <typeinfo>
+#include "GraphicsThrowMacros.h"
+#include "BindableCommon.h"
+#include "BindableCodex.h"
+#include "Material.h"
+#include <assimp\scene.h>
 
 using namespace Bind;
 
-void Drawable::Draw(Graphics& gfx) const noxnd
+
+void Drawable::Submit(FrameCommander& frame) const noexcept
 {
-	for (const auto& pb : m_Binds)
-		pb->Bind(gfx);
-	gfx.DrawIndexed(m_pIndexBuffer->GetCount());
+	for (const auto& tech : m_Techniques)
+		tech.Submit(frame, *this);
 }
 
-void Drawable::AddBind(std::shared_ptr<Bindable> pBind) noxnd
+Drawable::Drawable(Graphics& gfx, const Material& mat, const aiMesh& mesh, float scale) noexcept
 {
-	// Special case for index buffer
-	if (typeid(*pBind) == typeid(IndexBuffer))
-	{
-		assert(m_pIndexBuffer == nullptr && "Binding multiple index buffer is not allowed");
-		m_pIndexBuffer = &static_cast<IndexBuffer&>(*pBind);
-	}
-	m_Binds.push_back(std::move(pBind));
+	m_pVertices = mat.MakeVertexBindable(gfx, mesh, scale);
+	m_pIndices = mat.MakeIndexBindable(gfx, mesh);
+	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	for (auto& t : mat.GetTechniques())
+		AddTechnique(std::move(t));
 }
+
+void Drawable::AddTechnique(Technique tech_in) noexcept
+{
+	tech_in.InitializeParentReferences(*this);
+	m_Techniques.push_back(std::move(tech_in));
+}
+
+void Drawable::Bind(Graphics& gfx) const noexcept
+{
+	m_pTopology->Bind(gfx);
+	m_pIndices->Bind(gfx);
+	m_pVertices->Bind(gfx);
+}
+
+void Drawable::Accept(TechniqueProbe& probe)
+{
+	for (auto& t : m_Techniques)
+		t.Accept(probe);
+}
+
+UINT Drawable::GetIndexCount() const noxnd
+{
+	return m_pIndices->GetCount();
+}
+
+Drawable::~Drawable()
+{}

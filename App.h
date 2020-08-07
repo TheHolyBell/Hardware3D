@@ -10,7 +10,10 @@
 #include <optional>
 #include "Mesh.h"
 #include "TestPlane.h"
+#include "TestCube.h"
 #include "ScriptCommander.h"
+#include "FrameCommander.h"
+#include "Model.h"
 
 class App
 {
@@ -28,6 +31,7 @@ private:
 	
 	std::string m_CommandLine;
 	ScriptCommander m_ScriptCommander;
+	FrameCommander m_FrameCommander;
 
 	struct
 	{
@@ -39,9 +43,13 @@ private:
 		float z = 0.0f;
 	} m_Pos;
 	int x = 0, y = 0;
-	Model m_Gobber{ m_Window.Gfx(), "Models/gobber/GoblinX.obj", 6.0f };
+	/*Model m_Gobber{ m_Window.Gfx(), "Models/gobber/GoblinX.obj", 6.0f };
 	Model m_Wall{ m_Window.Gfx(), "Models/brick_wall/brick_wall.obj", 5.0f };
-	Model m_Nano{ m_Window.Gfx(), "Models/nano_textured/nanosuit.obj", 4.0f};
-	Model m_Sponza{ m_Window.Gfx(), "Models/Sponza/sponza.obj", 1.0f / 20.0f };
-	TestPlane m_TestPlane = { m_Window.Gfx(), 6.0f, {0.3f, 0.3f, 1.0f, 0.0f} };
+	Model m_Nano{ m_Window.Gfx(), "Models/nano_textured/nanosuit.obj", 4.0f};*/
+	//Model m_Sponza{ m_Window.Gfx(), "Models/Sponza/sponza.obj", 1.0f / 20.0f };
+	TestCube m_Cube{ m_Window.Gfx(), 4.0f };
+	TestCube m_Cube2{ m_Window.Gfx(), 4.0f };
+	Model m_Sponza{ m_Window.Gfx(), "Models\\Sponza\\sponza.obj", 1.0f / 20.0f };
+	//Model m_Gobber{ m_Window.Gfx(), "Models/nano_textured/nanosuit.obj", 6.0f };
+	//TestPlane m_TestPlane = { m_Window.Gfx(), 6.0f, {0.3f, 0.3f, 1.0f, 0.0f} };
 };

@@ -14,6 +14,8 @@ namespace Bind
 
 		virtual void Bind(Graphics& gfx) noexcept override;
 		virtual std::string GetUID() const noexcept override;
+		
+		const Dynamic::VertexLayout GetLayout() const noexcept;
 
 		static std::shared_ptr<InputLayout> Resolve(Graphics& gfx,
 			const Dynamic::VertexLayout& layout, ID3DBlob* pVertexShaderByteCode);

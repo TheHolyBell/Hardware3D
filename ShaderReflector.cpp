@@ -107,3 +107,75 @@ Dynamic::VertexLayout ShaderReflector::GetLayoutFromShader(ID3DBlob* shaderByteC
 
 	return _vertexLayout;
 }
+
+Dynamic::Buffer ShaderReflector::GetBufferByRegister(ID3DBlob* shaderByteCode, UINT Register)
+{
+    Microsoft::WRL::ComPtr<ID3D11ShaderReflection> _pReflector;
+    Dynamic::RawLayout _Layout;
+
+    if (FAILED(D3DReflect(shaderByteCode->GetBufferPointer(), shaderByteCode->GetBufferSize(), IID_ID3D11ShaderReflection, &_pReflector)))
+    {
+        assert(false && "Failed to reflect shader");
+    }
+
+    D3D11_SHADER_DESC _shaderDesc = {};
+
+    _pReflector->GetDesc(&_shaderDesc);
+
+
+
+    ID3D11ShaderReflectionConstantBuffer* _cbuffer = nullptr;
+    D3D11_SHADER_BUFFER_DESC _bufferDesc = {};
+
+    for (int i = 0; i < _shaderDesc.ConstantBuffers; ++i)
+    {
+        auto* _buff = _pReflector->GetConstantBufferByIndex(i);
+
+        _buff->GetDesc(&_bufferDesc);
+
+        D3D11_SHADER_INPUT_BIND_DESC _bindDesc = {};
+        _pReflector->GetResourceBindingDescByName(_bufferDesc.Name, &_bindDesc);
+        if (_bindDesc.BindPoint == Register)
+        {
+            _cbuffer = _buff;
+            break;
+        }
+    }
+
+    assert(_cbuffer != nullptr && "Failed to find CBuffer");
+
+
+    for (int i = 0; i < _bufferDesc.Variables; ++i)
+    {
+        auto _variable = _cbuffer->GetVariableByIndex(i);
+
+        D3D11_SHADER_VARIABLE_DESC _varDesc = {};
+        _variable->GetDesc(&_varDesc);
+        
+        auto _Type = _variable->GetType();
+
+        D3D11_SHADER_TYPE_DESC _typeDesc = {};
+        _Type->GetDesc(&_typeDesc);
+
+        std::string _variableType = _typeDesc.Name;
+
+        std::cout << "Current variable: " << _variableType << " " << _varDesc.Name << std::endl;
+        if (_variableType == "float")
+            _Layout.Add<Dynamic::Float>(_varDesc.Name);
+        else if (_variableType == "float2")
+            _Layout.Add<Dynamic::Float2>(_varDesc.Name);
+        else if (_variableType == "float3")
+            _Layout.Add<Dynamic::Float3>(_varDesc.Name);
+        else if (_variableType == "float4")
+            _Layout.Add<Dynamic::Float4>(_varDesc.Name);
+        else if (_variableType == "float4x4")
+            _Layout.Add<Dynamic::Matrix>(_varDesc.Name);
+        else if (_variableType == "bool")
+            _Layout.Add<Dynamic::Bool>(_varDesc.Name);
+
+    }
+
+    std::cout << "\n\n";
+
+    return Dynamic::Buffer(std::move(_Layout));
+}

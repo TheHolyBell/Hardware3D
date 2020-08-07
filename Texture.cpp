@@ -50,16 +50,45 @@ namespace Bind
 			pTexture.Get(), &srvDesc, &m_pTextureView
 		));*/
 
-		Microsoft::WRL::ComPtr<ID3D11Resource> _pTexture;
+		/*Microsoft::WRL::ComPtr<ID3D11Resource> _pTexture;
 
-		DirectX::CreateWICTextureFromFile(GetDevice(gfx), GetContext(gfx), std::wstring(path.begin(), path.end()).c_str() ,&_pTexture, &m_pTextureView);
-		GetContext(gfx)->GenerateMips(m_pTextureView.Get());
+		GFX_THROW_INFO( DirectX::CreateWICTextureFromFile(GetDevice(gfx), GetContext(gfx), std::wstring(path.begin(), path.end()).c_str() ,&_pTexture, &m_pTextureView));
+		//GetContext(gfx)->GenerateMips(m_pTextureView.Get());
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC _srvDesc = {};
 
 		m_pTextureView->GetDesc(&_srvDesc);
 		if (_srvDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM || _srvDesc.Format == DXGI_FORMAT_B8G8R8A8_UNORM)
-			m_bHasAlpha = true;
+			m_bHasAlpha = true;*/
+
+		const auto s = Surface::FromFile(path);
+		m_bHasAlpha = s.AlphaLoaded();
+
+		// Create texture resource
+		D3D11_TEXTURE2D_DESC _textureDesc = {};
+		_textureDesc.Width = s.GetWidth();
+		_textureDesc.Height = s.GetHeight();
+		_textureDesc.MipLevels = 0;
+		_textureDesc.ArraySize = 1;
+		_textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		_textureDesc.SampleDesc.Count = 1;
+		_textureDesc.SampleDesc.Quality = 0;
+		_textureDesc.Usage = D3D11_USAGE_DEFAULT;
+		_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+		wrl::ComPtr<ID3D11Texture2D> _pTexture;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateTexture2D(&_textureDesc,
+			nullptr, &_pTexture));
+
+		// Write image data into top mip level
+		GetContext(gfx)->UpdateSubresource(_pTexture.Get(),
+			0, nullptr, s.GetBufferPtrConst(), s.GetWidth() * sizeof(Surface::Color), 0);
+	
+		GFX_THROW_INFO(GetDevice(gfx)->CreateShaderResourceView(_pTexture.Get(),
+			nullptr, &m_pTextureView));
+
+		// Generate the mip-chain using the GPU rendering pipeline
+		GetContext(gfx)->GenerateMips(m_pTextureView.Get());
 	}
 
 	void Texture::Bind(Graphics& gfx) noexcept
@@ -78,6 +107,12 @@ namespace Bind
 	bool Texture::HasAlpha() const noexcept
 	{
 		return m_bHasAlpha;
+	}
+	UINT Texture::CalculateNumberOfMipLevels(UINT width, UINT height) noexcept
+	{
+		const float xSteps = std::ceil(log2((float)width));
+		const float ySteps = std::ceil(log2((float)height));
+		return (UINT)std::max(xSteps, ySteps);
 	}
 	std::string Texture::GetUID() const noexcept
 	{

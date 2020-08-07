@@ -1,15 +1,20 @@
 #include "TransformCbuf.h"
+#include "Drawable.h"
+#include "Graphics.h"
 
 namespace Bind
 {
-	TransformCbuf::TransformCbuf(Graphics& gfx, const Drawable& parent, UINT slot)
-		:
-		m_Parent(parent)
+	TransformCbuf::TransformCbuf(Graphics& gfx, UINT slot)
 	{
 		if (!s_pVCBuffer)
 		{
 			s_pVCBuffer = std::make_unique<VertexConstantBuffer<Transforms>>(gfx, slot);
 		}
+	}
+
+	void TransformCbuf::InitializeParentReference(const Drawable& parent) noexcept
+	{
+		m_pParent = &parent;
 	}
 
 	void TransformCbuf::Bind(Graphics& gfx) noexcept
@@ -25,7 +30,7 @@ namespace Bind
 
 	TransformCbuf::Transforms TransformCbuf::GetTransforms(Graphics& gfx) noexcept
 	{
-		const auto modelView = m_Parent.GetTransformXM() * gfx.GetCamera();
+		const auto modelView = m_pParent->GetTransformXM() * gfx.GetCamera();
 		return {
 			DirectX::XMMatrixTranspose(modelView),
 			DirectX::XMMatrixTranspose(

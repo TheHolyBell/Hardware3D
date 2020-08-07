@@ -13,9 +13,9 @@ namespace Bind
 	{
 		INFOMAN(gfx);
 
-		Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-		GFX_THROW_INFO(D3DReadFileToBlob(std::wstring{ path.begin(),path.end() }.c_str(), &pBlob));
-		GFX_THROW_INFO(GetDevice(gfx)->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &m_pPixelShader));
+		//Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
+		GFX_THROW_INFO(D3DReadFileToBlob(std::wstring{ path.begin(),path.end() }.c_str(), &m_pByteCode));
+		GFX_THROW_INFO(GetDevice(gfx)->CreatePixelShader(m_pByteCode->GetBufferPointer(), m_pByteCode->GetBufferSize(), nullptr, &m_pPixelShader));
 	}
 
 	void PixelShader::Bind(Graphics& gfx) noexcept
@@ -34,5 +34,9 @@ namespace Bind
 	std::string PixelShader::GetUID() const noexcept
 	{
 		return GenerateUID(m_Path);
+	}
+	ID3DBlob* PixelShader::GetByteCode() const noexcept
+	{
+		return m_pByteCode.Get();
 	}
 }

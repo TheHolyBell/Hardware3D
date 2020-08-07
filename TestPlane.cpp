@@ -8,7 +8,7 @@
 TestPlane::TestPlane(Graphics& gfx, float size, DirectX::XMFLOAT4 color)
 	: m_Pmc({color})
 {
-	using namespace Bind;
+	/*using namespace Bind;
 	namespace dx = DirectX;
 
 	auto model = Plane::Make();
@@ -35,7 +35,7 @@ TestPlane::TestPlane(Graphics& gfx, float size, DirectX::XMFLOAT4 color)
 
 	AddBind(Rasterizer::Resolve(gfx, true));
 
-	DirectX::XMStoreFloat4x4(&m_Transform, DirectX::XMMatrixIdentity());
+	DirectX::XMStoreFloat4x4(&m_Transform, DirectX::XMMatrixIdentity());*/
 }
 
 void TestPlane::SetPos(DirectX::XMFLOAT3 pos) noexcept
@@ -120,11 +120,11 @@ void TestPlane::SpawnControlWindow(Graphics& gfx, const std::string& name) noexc
 
 		ImGui::Checkbox("Gizmo", &m_bGizmoEnabled);
 
-		ImGui::Text("Shading");
+		/*ImGui::Text("Shading");
 		auto pBlender = QueryBindable<Bind::Blender>();
 		float factor = pBlender->GetFactor();
 		ImGui::SliderFloat("Translucency", &factor, 0.0f, 1.0f);
-		pBlender->SetFactor(factor);
+		pBlender->SetFactor(factor);*/
 	}
 
 	ImGui::End();

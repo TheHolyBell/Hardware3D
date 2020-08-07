@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include "SolidSphere.h"
 #include "ConstantBuffers.h"
+#include "ConditionalNoexcept.h"
 
 class PointLight
 {
@@ -10,7 +11,7 @@ public:
 
 	void SpawnControlWindow(Graphics& gfx) noexcept;
 	void Reset() noexcept;
-	void Draw(Graphics& gfx) const noexcept(!IS_DEBUG);
+	void Submit(class FrameCommander& frame) const noxnd;
 	void Bind(Graphics& gfx, DirectX::FXMMATRIX view) const noexcept;
 private:
 	struct PointLightCBuf

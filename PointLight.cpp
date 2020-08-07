@@ -1,5 +1,6 @@
 #include "PointLight.h"
 #include "ImGui\imgui.h"
+#include "FrameCommander.h"
 
 PointLight::PointLight(Graphics& gfx, float radius)
 	: m_Mesh(gfx, radius), m_CBuffer(gfx)
@@ -40,10 +41,16 @@ void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
 	ImGui::End();
 }
 
+void PointLight::Submit(FrameCommander& frame) const noxnd
+{
+	m_Mesh.SetPos(m_cbData.pos);
+	m_Mesh.Submit(frame);
+}
+
 void PointLight::Reset() noexcept
 {
 	m_cbData = {
-		{ 2.0f,9.0f,-17.0f },
+		{ 10.0f,9.0f,2.5f },
 		{ 0.05f,0.05f,0.05f },
 		{ 1.0f,1.0f,1.0f },
 		1.0f,
@@ -51,12 +58,6 @@ void PointLight::Reset() noexcept
 		0.045f,
 		0.0075f,
 	};
-}
-
-void PointLight::Draw(Graphics& gfx) const noexcept(!IS_DEBUG)
-{
-	m_Mesh.SetPos(m_cbData.pos);
-	m_Mesh.Draw(gfx);
 }
 
 void PointLight::Bind(Graphics& gfx, DirectX::FXMMATRIX view) const noexcept
