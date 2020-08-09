@@ -6,6 +6,7 @@
 #include <iostream>
 #include "ImGui\imgui_impl_win32.h"
 #include "WindowsMessageMap.h"
+#include "EventDispatcher.h"
 
 Window::WindowClass Window::WindowClass::s_Instance;
 
@@ -98,10 +99,6 @@ Window::~Window()
 	DestroyWindow(m_hWnd);
 }
 
-void Window::RegisterOnResizeCallback(std::function<void(int, int)> Func)
-{
-	OnResize = Func;
-}
 
 void Window::SetTitle(const std::string& title)
 {
@@ -229,8 +226,7 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		m_Width = LOWORD(lParam);
 		m_Height = HIWORD(lParam);
 
-		if (OnResize != nullptr)
-			OnResize(m_Width, m_Height);
+		EventDispatcher::InvokeOnResize(m_Width, m_Height);
 	}
 		break;
 	case WM_CLOSE:

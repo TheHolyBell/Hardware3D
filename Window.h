@@ -68,8 +68,6 @@ public:
 	Window(Window&& rhs) = delete;
 	Window&operator=(Window&& rhs) = delete;
 
-	void RegisterOnResizeCallback(std::function<void(int, int)> Func);
-
 	void SetTitle(const std::string& title);
 	Graphics& Gfx() const;
 	
@@ -101,6 +99,4 @@ private:
 	
 	bool m_bCursorEnabled = true;
 	std::vector<BYTE> m_RawBuffer;
-
-	std::function<void(int, int)> OnResize;
 };

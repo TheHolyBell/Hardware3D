@@ -107,41 +107,8 @@ TestCube::TestCube(Graphics& gfx, float size)
 			// TODO: better sub-layout generation tech for future consideration maybe
 			draw.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
 
-			// quick and dirty... nicer solution maybe takes a lamba... we'll see :)
-			class TransformCbufScaling : public TransformCbuf
-			{
-			public:
-				TransformCbufScaling(Graphics& gfx, float scale = 1.04)
-					:
-					TransformCbuf(gfx),
-					buf(MakeLayout())
-				{
-					buf["scale"] = scale;
-				}
-				void Accept(TechniqueProbe& probe) override
-				{
-					probe.VisitBuffer(buf);
-				}
-				void Bind(Graphics& gfx) noexcept override
-				{
-					const float scale = buf["scale"];
-					const auto scaleMatrix = dx::XMMatrixScaling(scale, scale, scale);
-					auto xf = GetTransforms(gfx);
-					xf.model = xf.model * scaleMatrix;
-					xf.MVP = xf.MVP * scaleMatrix;
-					UpdateBindImpl(gfx, xf);
-				}
-			private:
-				static Dynamic::RawLayout MakeLayout()
-				{
-					Dynamic::RawLayout layout;
-					layout.Add<Dynamic::Float>("scale");
-					return layout;
-				}
-			private:
-				Dynamic::Buffer buf;
-			};
-			draw.AddBindable(std::make_shared<TransformCbufScaling>(gfx));
+		
+			draw.AddBindable(std::make_shared<TransformCbuf>(gfx));
 
 			// TODO: might need to specify rasterizer when doubled-sided models start being used
 

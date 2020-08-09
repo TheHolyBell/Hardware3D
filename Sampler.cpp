@@ -4,16 +4,17 @@
 
 namespace Bind
 {
-	Sampler::Sampler(Graphics& gfx)
+	Sampler::Sampler(Graphics& gfx, bool anisotropicEnabled, bool reflect)
+		: m_bAnisotropicEnabled(anisotropicEnabled), m_bReflect(reflect)
 	{
 		INFOMAN(gfx);
 
-		D3D11_SAMPLER_DESC _sampDesc = {};
-		_sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-		_sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-		_sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-		_sampDesc.MaxAnisotropy = 16;
-		_sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		D3D11_SAMPLER_DESC _sampDesc = CD3D11_SAMPLER_DESC{ CD3D11_DEFAULT{} };
+		_sampDesc.Filter = anisotropicEnabled ? D3D11_FILTER_ANISOTROPIC : D3D11_FILTER_MIN_MAG_MIP_POINT;
+		_sampDesc.AddressU = reflect ? D3D11_TEXTURE_ADDRESS_MIRROR : D3D11_TEXTURE_ADDRESS_WRAP;
+		_sampDesc.AddressV = reflect ? D3D11_TEXTURE_ADDRESS_MIRROR : D3D11_TEXTURE_ADDRESS_WRAP;
+		_sampDesc.AddressW = reflect ? D3D11_TEXTURE_ADDRESS_MIRROR : D3D11_TEXTURE_ADDRESS_WRAP;
+		_sampDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
 		_sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 		GFX_THROW_INFO(GetDevice(gfx)->CreateSamplerState(&_sampDesc, &m_pSampler));
@@ -25,14 +26,15 @@ namespace Bind
 	}
 	std::string Sampler::GetUID() const noexcept
 	{
-		return GenerateUID();
+		return GenerateUID(m_bAnisotropicEnabled, m_bReflect);
 	}
-	std::string Sampler::GenerateUID()
+	std::string Sampler::GenerateUID(bool anisotropicEnabled, bool reflect)
 	{
-		return typeid(Sampler).name();
+		using namespace std::string_literals;
+		return typeid(Sampler).name() + "#"s + (anisotropicEnabled ? "A"s : "a"s) + (reflect ? "R"s : "W"s);
 	}
-	std::shared_ptr<Sampler> Sampler::Resolve(Graphics& gfx)
+	std::shared_ptr<Sampler> Sampler::Resolve(Graphics& gfx, bool anisotropicEnabled, bool reflect)
 	{
-		return Codex::Resolve<Sampler>(gfx);
+		return Codex::Resolve<Sampler>(gfx, anisotropicEnabled, reflect);
 	}
 }

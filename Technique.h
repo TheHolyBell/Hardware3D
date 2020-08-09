@@ -8,7 +8,9 @@ class Technique
 public:
 	Technique() = default;
 	Technique(std::string name, bool startActive = true) noexcept
-		: m_Name(name), m_bActive(startActive)
+		:
+		m_bActive(startActive),
+		m_Name(name)
 	{}
 	void Submit(class FrameCommander& frame, const class Drawable& drawable) const noexcept;
 	void AddStep(Step step) noexcept
@@ -19,16 +21,18 @@ public:
 	{
 		return m_bActive;
 	}
-	void SetActiveState(bool state) noexcept
+	void SetActiveState(bool active_in) noexcept
 	{
-		m_bActive = state;
+		m_bActive = active_in;
 	}
 	void InitializeParentReferences(const class Drawable& parent) noexcept;
 	void Accept(TechniqueProbe& probe)
 	{
 		probe.SetTechnique(this);
 		for (auto& s : m_Steps)
+		{
 			s.Accept(probe);
+		}
 	}
 	const std::string& GetName() const noexcept
 	{

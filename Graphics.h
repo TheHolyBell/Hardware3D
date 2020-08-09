@@ -7,6 +7,9 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <string>
+//#include "DepthStencil.h"
+
+class DepthStencil;
 
 namespace Bind
 {
@@ -15,7 +18,7 @@ namespace Bind
 
 class Graphics
 {
-	friend class Bind::Bindable;
+	friend class GraphicsResource;
 public:
 	class Exception : public ChiliException
 	{
@@ -61,8 +64,12 @@ public:
 
 	Graphics(Graphics&& rhs) = delete;
 	Graphics& operator=(Graphics&& rhs) = delete;
-	void BeginFrame(float red, float green, float blue) noexcept;
+
 	void EndFrame();
+	void BeginFrame(float red, float green, float blue) noexcept;
+	void BindSwapBuffer() noexcept;
+	void BindSwapBuffer(const DepthStencil& ds) noexcept;
+
 	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
 	
 	void SetProjection(DirectX::FXMMATRIX projection) noexcept;
@@ -74,6 +81,11 @@ public:
 	void EnableImGui() noexcept;
 	void DisableImGui() noexcept;
 	bool IsImGuiEnabled() const noexcept;
+
+	UINT GetWidth() const noexcept;
+	UINT GetHeight() const noexcept;
+
+	
 private:
 	void OnResize(int Width, int Height);
 private:
@@ -81,6 +93,8 @@ private:
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;
 #endif
+	UINT m_Width;
+	UINT m_Height;
 
 	DirectX::XMMATRIX m_Camera;
 	DirectX::XMMATRIX m_Projection;

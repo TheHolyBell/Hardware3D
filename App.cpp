@@ -78,7 +78,8 @@ void TestDynamicConstant()
 
 App::App(int Width, int Height, const std::string& title, const std::string& commandLine)
 	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx()),
-	m_CommandLine(commandLine), m_ScriptCommander(TokenizeQuoted(commandLine))
+	m_CommandLine(commandLine), m_ScriptCommander(TokenizeQuoted(commandLine)),
+	m_FrameCommander(m_Window.Gfx())
 {
 	//TestDynamicConstant();
 }
@@ -114,11 +115,9 @@ void App::DoFrame()
 	//nano.Draw( wnd.Gfx() );
 	//gobber.Draw( wnd.Gfx() );
 	m_Light.Submit(m_FrameCommander);
-	//sponza.Draw( wnd.Gfx() );
+	m_Sponza.Submit(m_FrameCommander);
 	m_Cube.Submit(m_FrameCommander);
 	m_Cube2.Submit(m_FrameCommander);
-	m_Sponza.Submit(m_FrameCommander);
-	//m_Gobber.Submit(m_FrameCommander);
 	//bluePlane.Draw( wnd.Gfx() );
 	//redPlane.Draw( wnd.Gfx() );
 	m_FrameCommander.Execute(gfx);
@@ -165,11 +164,11 @@ void App::DoFrame()
 		{
 			m_Camera.Translate({ dt,0.0f,0.0f });
 		}
-		if (m_Window.g_Keyboard.KeyIsPressed(VK_SPACE))
+		if (m_Window.g_Keyboard.KeyIsPressed('R'))
 		{
 			m_Camera.Translate({ 0.0f,dt,0.0f });
 		}
-		if (m_Window.g_Keyboard.KeyIsPressed(VK_SHIFT))
+		if (m_Window.g_Keyboard.KeyIsPressed('F'))
 		{
 			m_Camera.Translate({ 0.0f,-dt,0.0f });
 		}
@@ -187,20 +186,19 @@ void App::DoFrame()
 	class TP : public TechniqueProbe
 	{
 	public:
-		virtual void OnSetTechnique() override
+		void OnSetTechnique() override
 		{
 			using namespace std::string_literals;
-			ImGui::TextColored({ 0.4f, 1.0f, 0.6f, 1.0f }, m_pTech->GetName().c_str());
+			ImGui::TextColored({ 0.4f,1.0f,0.6f,1.0f }, m_pTech->GetName().c_str());
 			bool active = m_pTech->IsActive();
 			ImGui::Checkbox(("Tech Active##"s + std::to_string(techIdx)).c_str(), &active);
 			m_pTech->SetActiveState(active);
 		}
-
-		virtual bool OnVisitBuffer(Dynamic::Buffer& buffer) override
+		bool OnVisitBuffer(Dynamic::Buffer& buf) override
 		{
 			namespace dx = DirectX;
-			float _bDirty = false;
-			const auto dcheck = [&_bDirty](bool changed) {_bDirty = _bDirty || changed; };
+			float dirty = false;
+			const auto dcheck = [&dirty](bool changed) {dirty = dirty || changed; };
 			auto tag = [tagScratch = std::string{}, tagString = "##" + std::to_string(bufIdx)]
 			(const char* label) mutable
 			{
@@ -208,48 +206,47 @@ void App::DoFrame()
 				return tagScratch.c_str();
 			};
 
-			if (auto v = buffer["scale"]; v.Exists())
+			if (auto v = buf["scale"]; v.Exists())
 			{
 				dcheck(ImGui::SliderFloat(tag("Scale"), &v, 1.0f, 2.0f, "%.3f", 3.5f));
 			}
-			if (auto v = buffer["offset"]; v.Exists())
+			if (auto v = buf["offset"]; v.Exists())
 			{
 				dcheck(ImGui::SliderFloat(tag("offset"), &v, 0.0f, 1.0f, "%.3f", 2.5f));
 			}
-			if (auto v = buffer["materialColor"]; v.Exists())
+			if (auto v = buf["materialColor"]; v.Exists())
 			{
 				dcheck(ImGui::ColorPicker3(tag("Color"), reinterpret_cast<float*>(&static_cast<dx::XMFLOAT3&>(v))));
 			}
-			if (auto v = buffer["specularColor"]; v.Exists())
+			if (auto v = buf["specularColor"]; v.Exists())
 			{
 				dcheck(ImGui::ColorPicker3(tag("Spec. Color"), reinterpret_cast<float*>(&static_cast<dx::XMFLOAT3&>(v))));
 			}
-			if (auto v = buffer["specularGloss"]; v.Exists())
+			if (auto v = buf["specularGloss"]; v.Exists())
 			{
 				dcheck(ImGui::SliderFloat(tag("Glossiness"), &v, 1.0f, 100.0f, "%.1f", 1.5f));
 			}
-			if (auto v = buffer["specularWeight"]; v.Exists())
+			if (auto v = buf["specularWeight"]; v.Exists())
 			{
 				dcheck(ImGui::SliderFloat(tag("Spec. Weight"), &v, 0.0f, 2.0f));
 			}
-			if (auto v = buffer["useSpecularMap"]; v.Exists())
+			if (auto v = buf["useSpecularMap"]; v.Exists())
 			{
 				dcheck(ImGui::Checkbox(tag("Spec. Map Enable"), &v));
 			}
-			if (auto v = buffer["useNormalMap"]; v.Exists())
+			if (auto v = buf["useNormalMap"]; v.Exists())
 			{
 				dcheck(ImGui::Checkbox(tag("Normal Map Enable"), &v));
 			}
-			if (auto v = buffer["normalMapWeight"]; v.Exists())
+			if (auto v = buf["normalMapWeight"]; v.Exists())
 			{
 				dcheck(ImGui::SliderFloat(tag("Normal Map Weight"), &v, 0.0f, 2.0f));
 			}
-
-			return _bDirty;
+			return dirty;
 		}
 	};
 
-	class MP : protected ModelProbe
+	class MP : ModelProbe
 	{
 	public:
 		void SpawnWindow(Model& model)
@@ -259,7 +256,7 @@ void App::DoFrame()
 			model.Accept(*this);
 
 			ImGui::NextColumn();
-			if (m_pSelectedNode != nullptr)
+			if (pSelectedNode != nullptr)
 			{
 				bool dirty = false;
 				const auto dcheck = [&dirty](bool changed) {dirty = dirty || changed; };
@@ -274,7 +271,7 @@ void App::DoFrame()
 				dcheck(ImGui::SliderAngle("Z-rotation", &tf.zRot, -180.0f, 180.0f));
 				if (dirty)
 				{
-					m_pSelectedNode->SetAppliedTransform(
+					pSelectedNode->SetAppliedTransform(
 						dx::XMMatrixRotationX(tf.xRot) *
 						dx::XMMatrixRotationY(tf.yRot) *
 						dx::XMMatrixRotationZ(tf.zRot) *
@@ -282,10 +279,10 @@ void App::DoFrame()
 					);
 				}
 			}
-			if (m_pSelectedNode != nullptr)
+			if (pSelectedNode != nullptr)
 			{
 				TP probe;
-				m_pSelectedNode->Accept(probe);
+				pSelectedNode->Accept(probe);
 			}
 			ImGui::End();
 		}
@@ -293,7 +290,7 @@ void App::DoFrame()
 		bool PushNode(Node& node) override
 		{
 			// if there is no selected node, set selectedId to an impossible value
-			const int selectedId = (m_pSelectedNode == nullptr) ? -1 : m_pSelectedNode->GetId();
+			const int selectedId = (pSelectedNode == nullptr) ? -1 : pSelectedNode->GetId();
 			// build up flags for current node
 			const auto node_flags = ImGuiTreeNodeFlags_OpenOnArrow
 				| ((node.GetId() == selectedId) ? ImGuiTreeNodeFlags_Selected : 0)
@@ -320,15 +317,17 @@ void App::DoFrame()
 				} probe;
 
 				// remove highlight on prev-selected node
-				if (m_pSelectedNode != nullptr)
+				if (pSelectedNode != nullptr)
 				{
-					m_pSelectedNode->Accept(probe);
+					pSelectedNode->Accept(probe);
 				}
 				// add highlight to newly-selected node
 				probe.highlighted = true;
+				if (probe.highlighted && pSelectedNode != nullptr)
+					std::cout << "Highlited: " << pSelectedNode->GetId() << std::endl;
 				node.Accept(probe);
 
-				m_pSelectedNode = &node;
+				pSelectedNode = &node;
 			}
 			// signal if children should also be recursed
 			return expanded;
@@ -337,9 +336,8 @@ void App::DoFrame()
 		{
 			ImGui::TreePop();
 		}
-
 	private:
-		Node* m_pSelectedNode = nullptr;
+		Node* pSelectedNode = nullptr;
 		struct TransformParameters
 		{
 			float xRot = 0.0f;
@@ -353,7 +351,7 @@ void App::DoFrame()
 	private:
 		TransformParameters& ResolveTransform() noexcept
 		{
-			const auto id = m_pSelectedNode->GetId();
+			const auto id = pSelectedNode->GetId();
 			auto i = transformParams.find(id);
 			if (i == transformParams.end())
 			{
@@ -363,7 +361,7 @@ void App::DoFrame()
 		}
 		TransformParameters& LoadTransform(int id) noexcept
 		{
-			const auto& applied = m_pSelectedNode->GetAppliedTransform();
+			const auto& applied = pSelectedNode->GetAppliedTransform();
 			const auto angles = ExtractEulerAngles(applied);
 			const auto translation = ExtractTranslation(applied);
 			TransformParameters tp;
@@ -376,17 +374,15 @@ void App::DoFrame()
 			return transformParams.insert({ id,{ tp } }).first->second;
 		}
 	};
-
-	static MP _ModelProbe;
-
-	_ModelProbe.SpawnWindow(m_Sponza);
+	static MP modelProbe;
 
 	// imgui windows
+	modelProbe.SpawnWindow(m_Sponza);
 	m_Camera.SpawnControlWindow();
 	m_Light.SpawnControlWindow(gfx);
 	m_Cube.SpawnControlWindow(gfx, "Cube 1");
 	m_Cube2.SpawnControlWindow(gfx, "Cube 2");
-	
+	m_FrameCommander.ShowWindows(gfx);
 	//sponza.ShowWindow( wnd.Gfx(),"Sponza" );
 	//gobber.ShowWindow( wnd.Gfx(),"gobber" );
 	//wall.ShowWindow( wnd.Gfx(),"Wall" );
