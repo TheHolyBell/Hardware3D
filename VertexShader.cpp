@@ -2,6 +2,7 @@
 #include "GraphicsThrowMacros.h"
 #include "BindableCodex.h"
 #include "ShaderReflector.h"
+#include "ChiliUtil.h"
 
 #include <d3dcompiler.h>
 #include <iostream>
@@ -17,7 +18,7 @@ namespace Bind
 		if (!std::filesystem::exists(path))
 			std::cout << path << " " << "Doesn't exits" << std::endl;
 
-		GFX_THROW_INFO(D3DReadFileToBlob(std::wstring(path.begin(), path.end()).c_str(), &m_pByteCode));
+		GFX_THROW_INFO(D3DReadFileToBlob(ToWide("ShaderBins\\" + path).c_str(), &m_pByteCode));
 		GFX_THROW_INFO(GetDevice(gfx)->CreateVertexShader(
 			m_pByteCode->GetBufferPointer(),
 			m_pByteCode->GetBufferSize(),

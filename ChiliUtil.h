@@ -9,11 +9,13 @@ std::wstring ToWide(const std::string& narrow);
 
 std::string ToNarrow(const std::wstring& wide);
 
-template<typename Iter>
+template<class Iter>
 void SplitStringIter(const std::string& s, const std::string& delim, Iter out)
 {
 	if (delim.empty())
+	{
 		*out++ = s;
+	}
 	else
 	{
 		size_t a = 0, b = s.find(delim);
@@ -26,9 +28,6 @@ void SplitStringIter(const std::string& s, const std::string& delim, Iter out)
 	}
 }
 
-inline std::vector<std::string> SplitString(const std::string& s, const std::string& delim)
-{
-	std::vector<std::string> _Strings;
-	SplitStringIter(s, delim, std::back_inserter(_Strings));
-	return _Strings;
-}
+std::vector<std::string> SplitString(const std::string& s, const std::string& delim);
+
+bool StringContains(std::string_view haystack, std::string_view needle);

@@ -200,7 +200,7 @@ class MP : ModelProbe
 public:
 	void SpawnWindow(Model& model)
 	{
-		ImGui::Begin("Model");
+		ImGui::Begin(model.GetName().c_str());
 		ImGui::Columns(2, nullptr, true);
 		model.Accept(*this);
 

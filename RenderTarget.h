@@ -3,6 +3,7 @@
 #include "Bindable.h"
 
 class Graphics;
+class Surface;
 
 namespace Bind
 {
@@ -45,6 +46,8 @@ namespace Bind
 		virtual void Bind(Graphics& gfx) noexcept override;
 
 		virtual void Resize(Graphics& gfx, UINT width, UINT height) override;
+	
+		Surface ToSurface(Graphics& gfx) const;
 	private:
 		UINT m_Slot;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_pShaderResourceView;

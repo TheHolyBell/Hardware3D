@@ -6,6 +6,8 @@
 #include "ImGui\imgui_impl_win32.h"
 #include "ImGui\imgui_impl_dx11.h"
 
+#include "RenderTarget.h"
+
 #include "ChiliUtil.h"
 #include "Vertex.h"
 #include <iostream>
@@ -82,6 +84,8 @@ App::App(int Width, int Height, const std::string& title, const std::string& com
 {
 	m_Light.LinkTechniques(m_RenderGraph);
 	m_Sponza.LinkTechniques(m_RenderGraph);
+	m_Gobber.LinkTechniques(m_RenderGraph);
+	m_Nano.LinkTechniques(m_RenderGraph);
 }
 
 int App::Go()
@@ -118,16 +122,25 @@ void App::DoFrame(float dt)
 
 	m_Light.Submit();
 	m_Sponza.Submit();
+	m_Gobber.Submit();
+	m_Nano.Submit();
 
 	m_RenderGraph.Execute(gfx);
 
 	static MP _ModelProbe;
 
 	_ModelProbe.SpawnWindow(m_Sponza);
+	_ModelProbe.SpawnWindow(m_Gobber);
+	_ModelProbe.SpawnWindow(m_Nano);
+	
+	
 	m_Camera.SpawnControlWindow();
 	m_Light.SpawnControlWindow(gfx);
+	m_RenderGraph.RenderWidgets(gfx);
+
 
 	gfx.EndFrame();
+
 	m_RenderGraph.Reset();
 }
 

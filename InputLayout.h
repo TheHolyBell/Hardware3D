@@ -5,12 +5,14 @@
 
 namespace Bind
 {
+	class VertexShader;
+
 	class InputLayout : public Bindable
 	{
 	public:
 		InputLayout(Graphics& gfx,
 			Dynamic::VertexLayout layout,
-			ID3DBlob* pVertexShaderByteCode);
+			const VertexShader& vs);
 
 		virtual void Bind(Graphics& gfx) noexcept override;
 		virtual std::string GetUID() const noexcept override;
@@ -18,9 +20,10 @@ namespace Bind
 		const Dynamic::VertexLayout GetLayout() const noexcept;
 
 		static std::shared_ptr<InputLayout> Resolve(Graphics& gfx,
-			const Dynamic::VertexLayout& layout, ID3DBlob* pVertexShaderByteCode);
-		static std::string GenerateUID(const Dynamic::VertexLayout& layout, ID3DBlob* pVertexShaderByteCode = nullptr);
+			const Dynamic::VertexLayout& layout, const VertexShader& vs);
+		static std::string GenerateUID(const Dynamic::VertexLayout& layout, const VertexShader& vs);
 	protected:
+		std::string m_VertexShaderUID;
 		Dynamic::VertexLayout m_Layout;
 		Microsoft::WRL::ComPtr<ID3D11InputLayout> m_pInputLayout;
 	};

@@ -1,6 +1,7 @@
 #include "ScriptCommander.h"
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 #include "json.hpp"
 #include "TexturePreprocessor.h"
 
@@ -49,6 +50,11 @@ ScriptCommander::ScriptCommander(const std::vector<std::string>& args)
 					TexturePreprocessor::MakeStripes(_Params.at("dest"), _Params.at("size"), _Params.at("stripeWidth"));
 					_bAbort = true;
 				}
+				else if (_CommandName == "publish")
+				{
+					Publish(_Params.at("dest"));
+					_bAbort = true;
+				}
 				else
 				{
 					throw SCRIPT_ERROR("Unknown command: "s + _CommandName);
@@ -60,9 +66,34 @@ ScriptCommander::ScriptCommander(const std::vector<std::string>& args)
 	}
 }
 
+void ScriptCommander::Publish(const std::string& path) const
+{
+	namespace fs = std::filesystem;
+	fs::create_directory(path);
+	// Copy executable
+	fs::copy_file(R"(..\x64\Release\hw3d.exe)", path + R"(\hw3d.exe)", fs::copy_options::overwrite_existing);
+	// copy assimp ini
+	fs::copy_file("imgui_default.ini", path + R"(\imgui_default.ini)", fs::copy_options::overwrite_existing);
+	
+	// Copy all DLLs
+	for (const auto& p : fs::directory_iterator(""))
+	{
+		if (p.path().extension() == L".dll")
+			fs::copy_file(p.path(), path + "\\" + p.path().filename().string(),
+				fs::copy_options::overwrite_existing);
+	}
+
+	// Copy compiled shaders
+	fs::copy("ShaderBins", path + R"(\ShaderBins)", fs::copy_options::overwrite_existing);
+	// Copy assets
+	fs::copy("Images", path + R"(\Images)", fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+	fs::copy("Models", path + R"(\Models)", fs::copy_options::overwrite_existing | fs::copy_options::recursive);
+}
+
 ScriptCommander::Completion::Completion(const std::string& content) noexcept
 	: ChiliException(69, "@ScriptCommanderAbort"), m_Content(content)
 {
+	
 }
 
 const char* ScriptCommander::Completion::what() const noexcept

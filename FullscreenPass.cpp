@@ -21,7 +21,7 @@ namespace RenderGraph
 		AddBind(Bind::IndexBuffer::Resolve(gfx, "$Full", std::move(indices)));
 		// setup other common fullscreen bindables
 		auto vs = Bind::VertexShader::Resolve(gfx, "Fullscreen_VS.cso");
-		AddBind(Bind::InputLayout::Resolve(gfx, lay, vs->GetByteCode()));
+		AddBind(Bind::InputLayout::Resolve(gfx, lay, *vs));
 		AddBind(std::move(vs));
 		AddBind(Bind::Topology::Resolve(gfx));
 		AddBind(Bind::Rasterizer::Resolve(gfx, false));

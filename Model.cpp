@@ -12,13 +12,17 @@ namespace dx = DirectX;
 
 Model::Model(Graphics& gfx, const std::string& pathString, const float scale)
 {
+	m_Name = std::filesystem::path(pathString).filename().string();
+
+
 	Assimp::Importer _Importer;
 	const auto pScene = _Importer.ReadFile(pathString,
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_ConvertToLeftHanded |
 		aiProcess_GenNormals |
-		aiProcess_CalcTangentSpace);
+		aiProcess_CalcTangentSpace
+	);
 
 	if (pScene == nullptr)
 		throw ModelException(__LINE__, __FILE__, _Importer.GetErrorString());
@@ -60,6 +64,11 @@ void Model::LinkTechniques(RenderGraph::RenderGraph& renderGraph)
 {
 	for (auto& pMesh : m_MeshPtrs)
 		pMesh->LinkTechniques(renderGraph);
+}
+
+std::string Model::GetName() const
+{
+	return m_Name;
 }
 
 Model::~Model() noexcept

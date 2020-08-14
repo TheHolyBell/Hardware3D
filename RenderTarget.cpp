@@ -1,6 +1,7 @@
 #include "RenderTarget.h"
 #include "GraphicsThrowMacros.h"
 #include "DepthStencil.h"
+#include "Surface.h"
 #include <array>
 
 namespace wrl = Microsoft::WRL;
@@ -176,6 +177,48 @@ namespace Bind
 		ID3D11Texture2D* _pTexture = reinterpret_cast<ID3D11Texture2D*>(_pResource.Get());
 		
 		GFX_THROW_INFO(GetDevice(gfx)->CreateShaderResourceView(_pTexture, nullptr, &m_pShaderResourceView));
+	}
+
+	Surface Bind::ShaderInputRenderTarget::ToSurface(Graphics& gfx) const
+	{
+		INFOMAN(gfx);
+		
+		// Creating a temp texture compatible with the source, but with CPU read access
+		Microsoft::WRL::ComPtr<ID3D11Resource> _pResSource;
+		m_pShaderResourceView->GetResource(&_pResSource);
+		wrl::ComPtr<ID3D11Texture2D> _pTexSource;
+		_pResSource.As<ID3D11Texture2D>(&_pTexSource);
+
+		D3D11_TEXTURE2D_DESC _textureDesc = {};
+		_pTexSource->GetDesc(&_textureDesc);
+		_textureDesc.Usage = D3D11_USAGE_STAGING;
+		_textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		_textureDesc.BindFlags = 0;
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> _pTexTemp;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateTexture2D(&_textureDesc,
+			nullptr, &_pTexTemp));
+
+		// Copy texture contents
+		GFX_THROW_INFO_ONLY(GetContext(gfx)->CopyResource(_pTexTemp.Get(), _pTexSource.Get()));
+	
+		// Create surface and copy from temp texture to it
+		const auto width = GetWidth();
+		const auto height = GetHeight();
+		Surface _Surface{ width, height };
+		D3D11_MAPPED_SUBRESOURCE msr = {};
+		GFX_THROW_INFO(GetContext(gfx)->Map(_pTexTemp.Get(), 0, D3D11_MAP_READ, 0, &msr));
+		auto pSrcBytes = static_cast<const char*>(msr.pData);
+		for (unsigned int y = 0; y < height; y++)
+		{
+			auto pSrcRow = reinterpret_cast<const Surface::Color*>(pSrcBytes + msr.RowPitch * size_t(y));
+			for (unsigned int x = 0; x < width; x++)
+			{
+				_Surface.PutPixel(x, y, *(pSrcRow + x));
+			}
+		}
+		GFX_THROW_INFO_ONLY(GetContext(gfx)->Unmap(_pTexTemp.Get(), 0));
+
+		return _Surface;
 	}
 
 

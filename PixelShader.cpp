@@ -3,6 +3,8 @@
 #include "BindableCodex.h"
 #include <d3dcompiler.h>
 
+#include "ChiliUtil.h"
+
 #pragma comment(lib, "d3dcompiler.lib")
 
 namespace Bind
@@ -14,7 +16,7 @@ namespace Bind
 		INFOMAN(gfx);
 
 		//Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-		GFX_THROW_INFO(D3DReadFileToBlob(std::wstring{ path.begin(),path.end() }.c_str(), &m_pByteCode));
+		GFX_THROW_INFO(D3DReadFileToBlob(ToWide("ShaderBins\\" + path).c_str(), &m_pByteCode));
 		GFX_THROW_INFO(GetDevice(gfx)->CreatePixelShader(m_pByteCode->GetBufferPointer(), m_pByteCode->GetBufferSize(), nullptr, &m_pPixelShader));
 	}
 
