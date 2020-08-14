@@ -1,22 +1,54 @@
 #include "Technique.h"
 #include "Drawable.h"
-#include "FrameCommander.h"
+#include "TechniqueProbe.h"
 
-void Technique::Submit(FrameCommander& frame, const Drawable& drawable) const noexcept
+Technique::Technique(const std::string& name, bool startActive) noexcept
+	: m_bActive(startActive), m_Name(name)
+{
+}
+
+void Technique::Submit(const Drawable& drawable) const noexcept
 {
 	if (m_bActive)
-	{
 		for (const auto& step : m_Steps)
-		{
-			step.Submit(frame, drawable);
-		}
-	}
+			step.Submit(drawable);
+}
+
+void Technique::AddStep(Step step) noexcept
+{
+	m_Steps.push_back(std::move(step));
+}
+
+bool Technique::IsActive() const noexcept
+{
+	return m_bActive;
+}
+
+void Technique::SetActiveState(bool state) noexcept
+{
+	m_bActive = state;
 }
 
 void Technique::InitializeParentReferences(const Drawable& parent) noexcept
 {
 	for (auto& s : m_Steps)
-	{
 		s.InitializeParentReferences(parent);
-	}
+}
+
+void Technique::Accept(TechniqueProbe& probe)
+{
+	probe.SetTechnique(this);
+	for (auto& s : m_Steps)
+		s.Accept(probe);
+}
+
+const std::string& Technique::GetName() const noexcept
+{
+	return m_Name;
+}
+
+void Technique::Link(RenderGraph::RenderGraph& renderGraph)
+{
+	for (auto& step : m_Steps)
+		step.Link(renderGraph);
 }

@@ -11,6 +11,8 @@
 #include <iostream>
 #include "DepthStencil.h"
 #include "EventDispatcher.h"
+#include "DepthStencil.h"
+#include "RenderTarget.h"
 
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -32,7 +34,6 @@ Graphics::Graphics(Window& window)
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	//sd.OutputWindow = hwnd;
 	sd.OutputWindow = window.GetHWND();
 	sd.Windowed = true;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -63,7 +64,21 @@ Graphics::Graphics(Window& window)
 		&m_pImmediateContext
 	));
 
-	OnResize(window.GetWidth(), window.GetHeight());
+	//OnResize(window.GetWidth(), window.GetHeight());
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> _pBackbuffer;
+	GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_pBackbuffer));
+	m_pTarget = std::shared_ptr<Bind::RenderTarget>(new Bind::OutputOnlyRenderTarget(*this, _pBackbuffer.Get()));
+
+	D3D11_VIEWPORT vp = {};
+	vp.Width = m_Width;
+	vp.Height = m_Height;
+	vp.MaxDepth = 1.0f;
+	vp.MinDepth = 0.0f;
+
+	m_pImmediateContext->RSSetViewports(1, &vp);
+
+	m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, (float)m_Width / (float)m_Height, 1.0f, 3000.0f);
 
 	ImGui_ImplDX11_Init(m_pDevice.Get(), m_pImmediateContext.Get());
 
@@ -72,10 +87,6 @@ Graphics::Graphics(Window& window)
 
 void Graphics::BeginFrame(float red, float green, float blue) noexcept
 {
-	float _color[] = { red, green, blue, 1.0f };
-	m_pImmediateContext->ClearRenderTargetView(m_pRTV.Get(), _color);
-	//m_pImmediateContext->ClearDepthStencilView(m_pDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
 	if (m_bImGuiEnabled)
 	{
 		ImGui_ImplDX11_NewFrame();
@@ -96,7 +107,7 @@ void Graphics::EndFrame()
 #ifndef NDEBUG
 	infoManager.Set();
 #endif
-	if (FAILED(hr = m_pSwapChain->Present(1u, 0u)))
+	if (FAILED(hr = m_pSwapChain->Present(0u, 0u)))
 	{
 		if (hr == DXGI_ERROR_DEVICE_REMOVED)
 		{
@@ -159,27 +170,11 @@ UINT Graphics::GetHeight() const noexcept
 	return m_Height;
 }
 
-void Graphics::BindSwapBuffer() noexcept
+std::shared_ptr<Bind::RenderTarget> Graphics::GetTarget()
 {
-	D3D11_VIEWPORT vp = {};
-	vp.Width = m_Width;
-	vp.Height = m_Height;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	m_pImmediateContext->RSSetViewports(1, &vp);
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), nullptr);
+	return m_pTarget;
 }
 
-void Graphics::BindSwapBuffer(const DepthStencil& depthStencil) noexcept
-{
-	D3D11_VIEWPORT vp = {};
-	vp.Width = m_Width;
-	vp.Height = m_Height;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	m_pImmediateContext->RSSetViewports(1, &vp);
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), depthStencil.GetView());
-}
 
 void Graphics::OnResize(int Width, int Height)
 {
@@ -188,28 +183,19 @@ void Graphics::OnResize(int Width, int Height)
 
 	HRESULT hr;
 
-	m_pRTV.Reset();
-	m_pDSV.Reset();
-
-	GFX_THROW_INFO(m_pSwapChain->ResizeBuffers(1, Width, Height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
-	
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> _Backbuffer;
-	GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_Backbuffer));
-	GFX_THROW_INFO(m_pDevice->CreateRenderTargetView(_Backbuffer.Get(), nullptr, &m_pRTV));
-
-	/*D3D11_TEXTURE2D_DESC _depthDesc = {};
-	_depthDesc.Width = Width;
-	_depthDesc.Height = Height;
-	_depthDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	_depthDesc.MipLevels = 1;
-	_depthDesc.ArraySize = 1;
-	_depthDesc.SampleDesc.Count = 4;
-	_depthDesc.SampleDesc.Quality = 0;
-	_depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> _DepthBuffer;
-	GFX_THROW_INFO(m_pDevice->CreateTexture2D(&_depthDesc, nullptr, &_DepthBuffer));
-	GFX_THROW_INFO(m_pDevice->CreateDepthStencilView(_DepthBuffer.Get(), nullptr, &m_pDSV));*/
+	m_pTarget->ReleaseBuffer();
+	try
+	{
+		GFX_THROW_INFO(m_pSwapChain->ResizeBuffers(1, Width, Height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
+	}
+	catch (HrException& exc)
+	{
+		std::cout << exc.what() << std::endl;
+	}
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> _pBackbuffer;
+	GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_pBackbuffer));
+	//m_pTarget = std::shared_ptr<Bind::RenderTarget>(new Bind::OutputOnlyRenderTarget(*this, _pBackbuffer.Get()));
+	m_pTarget->Reset(*this, _pBackbuffer.Get());
 
 	D3D11_VIEWPORT vp = {};
 	vp.Width = Width;
@@ -221,9 +207,6 @@ void Graphics::OnResize(int Width, int Height)
 
 	m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, (float)Width / (float)Height, 1.0f, 3000.0f);
 	std::cout << "Window resized. New dimensions: [" << Width << ";" << Height << "]\n";
-
-	//m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), m_pDSV.Get());
-	m_pImmediateContext->OMSetRenderTargets(1, m_pRTV.GetAddressOf(), nullptr);
 }
 
 

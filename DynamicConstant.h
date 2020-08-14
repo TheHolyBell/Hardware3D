@@ -14,7 +14,8 @@
 	X( Float3 ) \
 	X( Float4 ) \
 	X( Matrix ) \
-	X( Bool )
+	X( Bool ) \
+	X( Integer )
 
 namespace Dynamic
 {
@@ -78,6 +79,13 @@ namespace Dynamic
 		static constexpr const char* code = "BL";
 		static constexpr bool valid = true;
 	};
+	template<> struct Map<Integer>
+	{
+		using SysType = int;
+		static constexpr size_t hlslSize = sizeof(SysType);
+		static constexpr const char* code = "IN";
+		static constexpr bool valid = true;
+	};
 
 	// ensures that every leaf type in master list has an entry in the static attribute map
 #define X(el) static_assert(Map<el>::valid,"Missing map implementation for " #el);
@@ -91,11 +99,11 @@ namespace Dynamic
 		static constexpr bool valid = false;
 	};
 #define X(el) \
-template<> struct ReverseMap<typename Map<el>::SysType> \
-{ \
-	static constexpr Type type = el; \
-	static constexpr bool valid = true; \
-};
+	template<> struct ReverseMap<typename Map<el>::SysType> \
+	{ \
+		static constexpr Type type = el; \
+		static constexpr bool valid = true; \
+	};
 	LEAF_ELEMENT_TYPES
 #undef X
 
@@ -162,7 +170,6 @@ template<> struct ReverseMap<typename Map<el>::SysType> \
 				LEAF_ELEMENT_TYPES
 #undef X
 			default:
-				
 				assert("Tried to resolve non-leaf element" && false);
 				return 0u;
 			}

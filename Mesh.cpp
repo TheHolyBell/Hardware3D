@@ -10,8 +10,7 @@
 #include "ConstantBuffersEx.h"
 #include "LayoutCodex.h"
 #include "Stencil.h"
-#include "ShaderReflector.h"
-#include "ModelException.h"
+
 
 namespace dx = DirectX;
 
@@ -19,15 +18,15 @@ Mesh::Mesh(Graphics& gfx, const Material& mat, const aiMesh& mesh, float scale) 
 	: Drawable(gfx, mat, mesh, scale)
 {}
 
+void Mesh::Submit(dx::FXMMATRIX accumulatedTransform) const noxnd
+{
+	dx::XMStoreFloat4x4(&m_Transform, accumulatedTransform);
+	Drawable::Submit();
+}
+
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept
 {
 	return DirectX::XMLoadFloat4x4(&m_Transform);
-}
-
-void Mesh::Submit(FrameCommander& frame, dx::FXMMATRIX accumulatedTransform) const noxnd
-{
-	dx::XMStoreFloat4x4(&m_Transform, accumulatedTransform);
-	Drawable::Submit(frame);
 }
 
 //

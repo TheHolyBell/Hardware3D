@@ -7,13 +7,16 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <string>
+#include <memory>
+#include "ConditionalNoexcept.h"
+//#include "RenderTarget.h"
 //#include "DepthStencil.h"
-
-class DepthStencil;
 
 namespace Bind
 {
 	class Bindable;
+	class RenderTarget;
+	class DepthStencil;
 }
 
 class Graphics
@@ -67,15 +70,13 @@ public:
 
 	void EndFrame();
 	void BeginFrame(float red, float green, float blue) noexcept;
-	void BindSwapBuffer() noexcept;
-	void BindSwapBuffer(const DepthStencil& ds) noexcept;
-
-	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
 	
-	void SetProjection(DirectX::FXMMATRIX projection) noexcept;
+	void DrawIndexed(UINT count) noxnd;
+	
+	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
 	
-	void SetCamera(DirectX::FXMMATRIX view) noexcept;
+	void SetCamera(DirectX::FXMMATRIX cam) noexcept;
 	DirectX::XMMATRIX GetCamera() const noexcept;
 
 	void EnableImGui() noexcept;
@@ -84,8 +85,8 @@ public:
 
 	UINT GetWidth() const noexcept;
 	UINT GetHeight() const noexcept;
-
 	
+	std::shared_ptr<Bind::RenderTarget> GetTarget();
 private:
 	void OnResize(int Width, int Height);
 private:
@@ -102,6 +103,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pImmediateContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> m_pSwapChain;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRTV;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDSV;
+	std::shared_ptr<Bind::RenderTarget> m_pTarget;
 };

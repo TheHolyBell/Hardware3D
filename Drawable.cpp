@@ -7,21 +7,24 @@
 
 using namespace Bind;
 
-
-void Drawable::Submit(FrameCommander& frame) const noexcept
+void Drawable::Submit() const noexcept
 {
 	for (const auto& tech : m_Techniques)
-		tech.Submit(frame, *this);
+	{
+		tech.Submit(*this);
+	}
 }
 
 Drawable::Drawable(Graphics& gfx, const Material& mat, const aiMesh& mesh, float scale) noexcept
 {
 	m_pVertices = mat.MakeVertexBindable(gfx, mesh, scale);
 	m_pIndices = mat.MakeIndexBindable(gfx, mesh);
-	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pTopology = Bind::Topology::Resolve(gfx);
 
 	for (auto& t : mat.GetTechniques())
+	{
 		AddTechnique(std::move(t));
+	}
 }
 
 void Drawable::AddTechnique(Technique tech_in) noexcept
@@ -30,7 +33,7 @@ void Drawable::AddTechnique(Technique tech_in) noexcept
 	m_Techniques.push_back(std::move(tech_in));
 }
 
-void Drawable::Bind(Graphics& gfx) const noexcept
+void Drawable::Bind(Graphics& gfx) const noxnd
 {
 	m_pTopology->Bind(gfx);
 	m_pIndices->Bind(gfx);
@@ -40,12 +43,22 @@ void Drawable::Bind(Graphics& gfx) const noexcept
 void Drawable::Accept(TechniqueProbe& probe)
 {
 	for (auto& t : m_Techniques)
+	{
 		t.Accept(probe);
+	}
 }
 
 UINT Drawable::GetIndexCount() const noxnd
 {
 	return m_pIndices->GetCount();
+}
+
+void Drawable::LinkTechniques(RenderGraph::RenderGraph& rg)
+{
+	for (auto& tech : m_Techniques)
+	{
+		tech.Link(rg);
+	}
 }
 
 Drawable::~Drawable()

@@ -1,24 +1,44 @@
 #pragma once
-#include "Graphics.h"
-#include "Job.h"
+#include "ConditionalNoexcept.h"
+#include <string>
 #include <vector>
+#include <array>
+#include <memory>
 
-class Pass
+class Graphics;
+
+namespace Bind
 {
-public:
-	void Accept(Job job) noexcept
+	class RenderTarget;
+	class DepthStencil;
+}
+
+namespace RenderGraph
+{
+	class Sink;
+	class Source;
+
+	class Pass
 	{
-		m_Jobs.push_back(job);
-	}
-	void Execute(Graphics& gfx) const noxnd
-	{
-		for (const auto& j : m_Jobs)
-			j.Execute(gfx);
-	}
-	void Reset() noexcept
-	{
-		m_Jobs.clear();
-	}
-private:
-	std::vector<Job> m_Jobs;
-};
+	public:
+		Pass(const std::string& name) noexcept;
+
+		virtual void Execute(Graphics& gfx) const noxnd = 0;
+		virtual void Reset() noxnd;
+
+		const std::string& GetName() const noexcept;
+		const std::vector<std::unique_ptr<Sink>>& GetSinks() const;
+		Source& GetSource(const std::string& registeredName) const;
+		Sink& GetSink(const std::string& registeredName) const;
+		void SetSinkLinkage(const std::string& registeredName, const std::string& target);
+		virtual void Finalize();
+		virtual ~Pass();
+	protected:
+		void RegisterSink(std::unique_ptr<Sink> sink);
+		void RegisterSource(std::unique_ptr<Source> source);
+	private:
+		std::vector<std::unique_ptr<Sink>> m_Sinks;
+		std::vector<std::unique_ptr<Source>> m_Sources;
+		std::string m_Name;
+	};
+}

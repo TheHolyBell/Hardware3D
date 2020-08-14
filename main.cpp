@@ -19,7 +19,7 @@ int main()
 {
 	try
 	{
-		return App{1280, 720}.Go();
+		return App{1600, 900}.Go();
 	}
 	catch (const ChiliException& e)
 	{

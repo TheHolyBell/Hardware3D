@@ -21,7 +21,7 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 
 	{
 		Technique solid;
-		Step only{ 0 };
+		Step only("lambertian");
 
 		auto pvs = VertexShader::Resolve(gfx, "Solid_VS.cso");
 		auto pvsbc = pvs->GetByteCode();
@@ -31,20 +31,18 @@ SolidSphere::SolidSphere(Graphics& gfx, float radius)
 
 		struct PSColorConstant
 		{
-			alignas(16) dx::XMFLOAT3 color = { 1.0f, 1.0f, 1.0f };
+			dx::XMFLOAT3 color = { 1.0f,1.0f,1.0f };
+			float padding;
 		} colorConst;
-		only.AddBindable(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConst, 1));
+		only.AddBindable(PixelConstantBuffer<PSColorConstant>::Resolve(gfx, colorConst, 1u));
 
 		only.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
 
 		only.AddBindable(std::make_shared<TransformCbuf>(gfx));
 
-		only.AddBindable(Blender::Resolve(gfx, false));
-
 		only.AddBindable(Rasterizer::Resolve(gfx, false));
 
 		solid.AddStep(std::move(only));
-
 		AddTechnique(std::move(solid));
 	}
 

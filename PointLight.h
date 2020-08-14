@@ -4,6 +4,11 @@
 #include "ConstantBuffers.h"
 #include "ConditionalNoexcept.h"
 
+namespace RenderGraph
+{
+	class RenderGraph;
+}
+
 class PointLight
 {
 public:
@@ -11,8 +16,9 @@ public:
 
 	void SpawnControlWindow(Graphics& gfx) noexcept;
 	void Reset() noexcept;
-	void Submit(class FrameCommander& frame) const noxnd;
+	void Submit() const noxnd;
 	void Bind(Graphics& gfx, DirectX::FXMMATRIX view) const noexcept;
+	void LinkTechniques(RenderGraph::RenderGraph& renderGraph);
 private:
 	struct PointLightCBuf
 	{

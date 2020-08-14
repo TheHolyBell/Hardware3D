@@ -61,6 +61,9 @@
     <Filter Include="Events">
       <UniqueIdentifier>{c9f7729f-7334-4ae4-9bff-288587be5d9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Render Queue System\PassLib">
+      <UniqueIdentifier>{f19ae460-09b0-46b8-87eb-1c5211de71a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -243,14 +246,53 @@
     <ClCompile Include="GraphicsResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DepthStencil.cpp">
-      <Filter>PostProcessing</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
-      <Filter>PostProcessing</Filter>
-    </ClCompile>
     <ClCompile Include="EventDispatcher.cpp">
       <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderGraphCompileException.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthStencil.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="Sink.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderGraph.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="ScaleOutlineRenderGraph.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="BlurOutlineRenderGraph.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="BindingPass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferClearPass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderQueuePass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClCompile>
+    <ClCompile Include="FullscreenPass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClCompile>
+    <ClCompile Include="HorizontalBlurPass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClCompile>
+    <ClCompile Include="VerticalBlurPass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClCompile>
+    <ClCompile Include="Pass.cpp">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -698,13 +740,7 @@
     <ClInclude Include="Step.h">
       <Filter>Header Files\Render Queue System</Filter>
     </ClInclude>
-    <ClInclude Include="Pass.h">
-      <Filter>Header Files\Render Queue System</Filter>
-    </ClInclude>
     <ClInclude Include="Technique.h">
-      <Filter>Header Files\Render Queue System</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameCommander.h">
       <Filter>Header Files\Render Queue System</Filter>
     </ClInclude>
     <ClInclude Include="NullPixelShader.h">
@@ -737,12 +773,6 @@
     <ClInclude Include="GraphicsResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DepthStencil.h">
-      <Filter>PostProcessing</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTarget.h">
-      <Filter>PostProcessing</Filter>
-    </ClInclude>
     <ClInclude Include="BlurPack.h">
       <Filter>PostProcessing</Filter>
     </ClInclude>
@@ -751,6 +781,69 @@
     </ClInclude>
     <ClInclude Include="Event.h">
       <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferResource.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencil.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderGraphCompileException.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderGraph.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="Sink.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="TestModelProbe.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="ScaleOutlineRenderGraph.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="BlurOutlineRenderGraph.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="BindingPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferClearPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderQueuePass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="BlurOutlineDrawingPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="FullscreenPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="HorizontalBlurPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="LambertianPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="OutlineDrawingPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="OutlineMaskGenerationPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="VerticalBlurPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Pass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

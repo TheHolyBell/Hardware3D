@@ -22,10 +22,12 @@ TestCube::TestCube(Graphics& gfx, float size)
 	m_pIndices = IndexBuffer::Resolve(gfx, geometryTag, model.indices);
 	m_pTopology = Topology::Resolve(gfx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	auto tcb = std::make_shared<TransformCbuf>(gfx);
+
 	{
 		Technique shade("Shade");
 		{
-			Step only(0);
+			Step only("lambertian");
 
 			only.AddBindable(Texture::Resolve(gfx, "Images\\brickwall.jpg"));
 			only.AddBindable(Sampler::Resolve(gfx));
@@ -34,22 +36,13 @@ TestCube::TestCube(Graphics& gfx, float size)
 			auto pvsbc = pvs->GetByteCode();
 			only.AddBindable(std::move(pvs));
 
-			//only.AddBindable(PixelShader::Resolve(gfx, "PhongDif_PS.cso"));
+			only.AddBindable(PixelShader::Resolve(gfx, "PhongDif_PS.cso"));
 
-			///////////
-
-			auto pps = PixelShader::Resolve(gfx, "PhongDif_PS.cso");
-			auto ppsbc = pps->GetByteCode();
-			only.AddBindable(std::move(pps));
-
-			///////////
-
-			/*Dynamic::RawLayout lay;
+			Dynamic::RawLayout lay;
 			lay.Add<Dynamic::Float3>("specularColor");
 			lay.Add<Dynamic::Float>("specularWeight");
 			lay.Add<Dynamic::Float>("specularGloss");
-			auto buf = Dynamic::Buffer(std::move(lay));*/
-			auto buf = ShaderReflector::GetBufferByRegister(ppsbc, 1);
+			auto buf = Dynamic::Buffer(std::move(lay));
 			buf["specularColor"] = dx::XMFLOAT3{ 1.0f,1.0f,1.0f };
 			buf["specularWeight"] = 0.1f;
 			buf["specularGloss"] = 20.0f;
@@ -57,7 +50,9 @@ TestCube::TestCube(Graphics& gfx, float size)
 
 			only.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
 
-			only.AddBindable(std::make_shared<TransformCbuf>(gfx));
+			only.AddBindable(Rasterizer::Resolve(gfx, false));
+
+			only.AddBindable(tcb);
 
 			shade.AddStep(std::move(only));
 		}
@@ -67,47 +62,29 @@ TestCube::TestCube(Graphics& gfx, float size)
 	{
 		Technique outline("Outline");
 		{
-			Step mask(1);
-
-			auto pvs = VertexShader::Resolve(gfx, "Solid_VS.cso");
-			auto pvsbc = pvs->GetByteCode();
-			mask.AddBindable(std::move(pvs));
+			Step mask("outlineMask");
 
 			// TODO: better sub-layout generation tech for future consideration maybe
-			mask.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
+			mask.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), VertexShader::Resolve(gfx, "Solid_VS.cso")->GetByteCode()));
 
-			mask.AddBindable(std::make_shared<TransformCbuf>(gfx));
+			mask.AddBindable(std::move(tcb));
 
 			// TODO: might need to specify rasterizer when doubled-sided models start being used
 
 			outline.AddStep(std::move(mask));
 		}
 		{
-			Step draw(2);
-
-			// these can be pass-constant (tricky due to layout issues)
-			auto pvs = VertexShader::Resolve(gfx, "Solid_VS.cso");
-			auto pvsbc = pvs->GetByteCode();
-			draw.AddBindable(std::move(pvs));
-
-			// this can be pass-constant
-			//draw.AddBindable(PixelShader::Resolve(gfx, "Solid_PS.cso"));
-
-			auto pps = PixelShader::Resolve(gfx, "Solid_PS.cso");
-			auto ppsbc = pps->GetByteCode();
-			draw.AddBindable(std::move(pps));
+			Step draw("outlineDraw");
 
 			Dynamic::RawLayout lay;
 			lay.Add<Dynamic::Float4>("color");
-			//auto buf = Dynamic::Buffer(std::move(lay));
-			auto buf = ShaderReflector::GetBufferByRegister(ppsbc, 1);
-			buf["color"] = DirectX::XMFLOAT4{ 1.0f,0.0f,0.0f, 1.0f};
+			auto buf = Dynamic::Buffer(std::move(lay));
+			buf["color"] = DirectX::XMFLOAT4{ 1.0f,0.4f,0.4f,1.0f };
 			draw.AddBindable(std::make_shared<Bind::CachingPixelConstantBufferEx>(gfx, buf, 1u));
 
 			// TODO: better sub-layout generation tech for future consideration maybe
-			draw.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), pvsbc));
+			draw.AddBindable(InputLayout::Resolve(gfx, model.vertices.GetLayout(), VertexShader::Resolve(gfx, "Solid_VS.cso")->GetByteCode()));
 
-		
 			draw.AddBindable(std::make_shared<TransformCbuf>(gfx));
 
 			// TODO: might need to specify rasterizer when doubled-sided models start being used
@@ -239,6 +216,7 @@ void TestCube::SpawnControlWindow(Graphics& gfx, const std::string& name) noexce
 				return dirty;
 			}
 		} probe;
+
 		Accept(probe);
 	}
 	ImGui::End();

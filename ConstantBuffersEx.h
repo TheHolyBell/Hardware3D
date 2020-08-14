@@ -127,26 +127,4 @@ namespace Bind
 
 	using CachingPixelConstantBufferEx = CachingConstantBufferEx<PixelConstantBufferEx>;
 	using CachingVertexConstantBufferEx = CachingConstantBufferEx<VertexConstantBufferEx>;
-
-	/*class NocachePixelConstantBufferEX : public PixelConstantBufferEX
-	{
-	public:
-		NocachePixelConstantBufferEX(Graphics& gfx, const Dynamic::CookedLayout& layout, UINT slot)
-			:
-			PixelConstantBufferEX(gfx, *layout.ShareRoot(), slot, nullptr),
-			m_pLayoutRoot(layout.ShareRoot())
-		{
-
-		}
-		NocachePixelConstantBufferEX(Graphics& gfx, const Dynamic::Buffer& buf, UINT slot)
-			: PixelConstantBufferEX(gfx, buf.GetRootLayoutElement(), slot, &buf),
-			m_pLayoutRoot(buf.ShareLayoutRoot())
-		{}
-		const Dynamic::LayoutElement& GetRootLayoutElement() const noexcept override
-		{
-			return *m_pLayoutRoot;
-		}
-	private:
-		std::shared_ptr<Dynamic::LayoutElement> m_pLayoutRoot;
-	};*/
 }

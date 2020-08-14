@@ -9,33 +9,40 @@ class TechniqueProbe;
 class Material;
 struct aiMesh;
 
+namespace RenderGraph
+{
+	class RenderGraph;
+}
+
 namespace Bind
 {
-	class Bindable;
 	class IndexBuffer;
+	class VertexBuffer;
 	class Topology;
 	class InputLayout;
-	class VertexBuffer;
 }
 
 class Drawable
 {
 public:
 	Drawable() = default;
+
+	Drawable(Graphics& gfx, const Material& mat, const aiMesh& mesh, float scale = 1.0f) noexcept;
 	
 	Drawable(const Drawable& rhs) = delete;
 	Drawable& operator=(const Drawable& rhs) = delete;
 
-	Drawable(Graphics& gfx, const Material& mat, const aiMesh& mesh, float scale = 1.0f) noexcept;
+	Drawable(Drawable&& rhs) = delete;
+	Drawable& operator=(Drawable&& rhs) = delete;
 
 	void AddTechnique(Technique tech) noexcept;
-	void Submit(class FrameCommander& frame) const noexcept;
-	void Bind(Graphics& gfx) const noexcept;
+	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
+	void Submit() const noexcept;
+	void Bind(Graphics& gfx) const noxnd;
 	void Accept(TechniqueProbe& probe);
 	UINT GetIndexCount() const noxnd;
+	void LinkTechniques(RenderGraph::RenderGraph& renderGraph);
 	virtual ~Drawable();
-
-	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
 protected:
 	std::shared_ptr<Bind::IndexBuffer> m_pIndices;
 	std::shared_ptr<Bind::VertexBuffer> m_pVertices;
