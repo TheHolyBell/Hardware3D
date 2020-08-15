@@ -21,6 +21,7 @@
 #include "TestModelProbe.h"
 #include "Node.h"
 #include "ChiliXM.h"
+#include "Gamepad.h"
 
 #define PI 3.14159
 
@@ -80,7 +81,8 @@ void TestDynamicConstant()
 }
 
 App::App(int Width, int Height, const std::string& title, const std::string& commandLine)
-	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx()), m_ScriptCommander(TokenizeQuoted(commandLine))
+	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx()), m_ScriptCommander(TokenizeQuoted(commandLine)),
+	m_ControlType(ControlType::RawInput)
 {
 	m_Light.LinkTechniques(m_RenderGraph);
 	m_Sponza.LinkTechniques(m_RenderGraph);
@@ -137,39 +139,15 @@ void App::DoFrame(float dt)
 	m_Camera.SpawnControlWindow();
 	m_Light.SpawnControlWindow(gfx);
 	m_RenderGraph.RenderWidgets(gfx);
-
+	RenderControlSelectWindow(gfx);
 
 	gfx.EndFrame();
 
 	m_RenderGraph.Reset();
 }
 
-void App::HandleInput(float dt)
+void App::HandleRawInput(float dt)
 {
-	while (const auto e = m_Window.g_Keyboard.ReadKey())
-	{
-		if (!e->IsPress())
-		{
-			continue;
-		}
-
-		switch (e->GetCode())
-		{
-		case VK_ESCAPE:
-			if (m_Window.CursorEnabled())
-			{
-				m_Window.DisableCursor();
-				m_Window.g_Mouse.EnableRaw();
-			}
-			else
-			{
-				m_Window.EnableCursor();
-				m_Window.g_Mouse.DisableRaw();
-			}
-			break;
-		}
-	}
-
 	if (!m_Window.CursorEnabled())
 	{
 		if (m_Window.g_Keyboard.KeyIsPressed('W'))
@@ -202,7 +180,95 @@ void App::HandleInput(float dt)
 	{
 		if (!m_Window.CursorEnabled())
 		{
+			std::cout << "DeltaX: " << delta->x << " " << "DeltaY: " << delta->y << std::endl;
 			m_Camera.Rotate((float)delta->x, (float)delta->y);
 		}
 	}
+}
+
+void App::HandleInput(float dt)
+{
+	while (const auto e = m_Window.g_Keyboard.ReadKey())
+	{
+		if (!e->IsPress())
+		{
+			continue;
+		}
+
+		switch (e->GetCode())
+		{
+		case VK_ESCAPE:
+			if (m_Window.CursorEnabled())
+			{
+				m_Window.DisableCursor();
+				m_Window.g_Mouse.EnableRaw();
+			}
+			else
+			{
+				m_Window.EnableCursor();
+				m_Window.g_Mouse.DisableRaw();
+			}
+			break;
+		}
+	}
+
+	switch (m_ControlType)
+	{
+	case ControlType::Gamepad:
+		HandleGamepad(dt);
+		break;
+	case ControlType::RawInput:
+		HandleRawInput(dt);
+		break;
+	}
+}
+
+void App::HandleGamepad(float dt)
+{
+	if (!m_Window.CursorEnabled())
+	{
+		Gamepad& _Gamepad = Gamepad::Get();
+		_Gamepad.UpdateState();
+		auto Left = _Gamepad.LeftStick();
+		auto Right = _Gamepad.RightStick();
+
+		m_Camera.Rotate(Right.first * 10.0f, -Right.second * 10.0f);
+
+		std::cout << "DeltaX: " << Right.first * 10.0f << " " << "DeltaY: " << -Right.second * 10.0f << std::endl;
+
+		m_Camera.Translate({ Left.first * dt, 0.0f, Left.second * dt });
+
+		if (_Gamepad.IsPressed(Button::GAMEPAD_A) || _Gamepad.IsPressed(Button::GAMEPAD_DPAD_UP))
+			m_Camera.Translate({ 0.0f, dt, 0.0f });
+		if (_Gamepad.IsPressed(Button::GAMEPAD_B) || _Gamepad.IsPressed(Button::GAMEPAD_DPAD_DOWN))
+			m_Camera.Translate({ 0.0f, -dt, 0.0f });
+	}
+}
+
+void App::RenderControlSelectWindow(Graphics& gfx)
+{
+	static const char* _ControlTypes[] = { "RawInput", "Gamepad" };
+	static const char* _CurrentItem = _ControlTypes[0];
+	if (ImGui::Begin("Control Type"))
+	{
+		if (ImGui::BeginCombo("Type", _CurrentItem))
+		{
+			for (int i = 0; i < std::size(_ControlTypes); ++i)
+			{
+				const bool _bSelected = _CurrentItem == _ControlTypes[i];
+				if (ImGui::Selectable(_ControlTypes[i], _bSelected))
+				{
+					_CurrentItem = _ControlTypes[i];
+					if (_CurrentItem == _ControlTypes[0])
+						m_ControlType = ControlType::RawInput;
+					else if (_CurrentItem == _ControlTypes[1])
+						m_ControlType = ControlType::Gamepad;
+				}
+				if (_bSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+	}
+	ImGui::End();
 }

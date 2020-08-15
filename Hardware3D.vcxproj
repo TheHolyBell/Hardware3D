@@ -197,6 +197,7 @@
     <ClCompile Include="DynamicConstant.cpp" />
     <ClCompile Include="EventDispatcher.cpp" />
     <ClCompile Include="FullscreenPass.cpp" />
+    <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="GraphicsResource.cpp" />
     <ClCompile Include="HorizontalBlurPass.cpp" />
@@ -364,6 +365,7 @@
     <ClInclude Include="DynamicConstant.h" />
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="FullscreenPass.h" />
+    <ClInclude Include="Gamepad.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="GraphicsResource.h" />
     <ClInclude Include="GraphicsThrowMacros.h" />

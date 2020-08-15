@@ -18,13 +18,24 @@ public:
 	~App();
 private:
 	void DoFrame(float dt);
+	void HandleRawInput(float dt);
+	void HandleGamepad(float dt);
 	void HandleInput(float dt);
+	void RenderControlSelectWindow(Graphics& gfx);
+
+private:
+	enum class ControlType
+	{
+		RawInput,
+		Gamepad
+	};
 private:
 	ImguiManager m_ImGuiManager;
 	Window m_Window;
 	Camera m_Camera;
 	Timer m_Timer;
 	PointLight m_Light;
+	ControlType m_ControlType;
 
 	ScriptCommander m_ScriptCommander;
 	RenderGraph::BlurOutlineRenderGraph m_RenderGraph{m_Window.Gfx()};

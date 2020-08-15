@@ -294,6 +294,9 @@
     <ClCompile Include="Pass.cpp">
       <Filter>Header Files\Render Queue System\PassLib</Filter>
     </ClCompile>
+    <ClCompile Include="Gamepad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -844,6 +847,9 @@
     </ClInclude>
     <ClInclude Include="Pass.h">
       <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamepad.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
