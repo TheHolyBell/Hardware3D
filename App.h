@@ -37,6 +37,9 @@ private:
 	PointLight m_Light;
 	ControlType m_ControlType;
 
+	int m_LeftMotorVibration = 0;
+	int m_RightMotorVibration = 0;
+
 	ScriptCommander m_ScriptCommander;
 	RenderGraph::BlurOutlineRenderGraph m_RenderGraph{m_Window.Gfx()};
 	float m_Speedfactor = 1.0f;

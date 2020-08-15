@@ -14,7 +14,7 @@ Gamepad& Gamepad::Get()
 bool Gamepad::IsPressed(Button btn) const
 {
 	if (StateChanged())
-		return (m_State.Gamepad.wButtons & btn) != 0;
+		return (m_State.Gamepad.wButtons & (int)btn) != 0;
 	return false;
 }
 
@@ -40,6 +40,22 @@ float Gamepad::LeftTrigger() const
 float Gamepad::RightTrigger() const
 {
 	return m_State.Gamepad.bRightTrigger / 255.0f;
+}
+
+void Gamepad::SetVibration(int leftMotor, int rightMotor)
+{
+	m_LeftMotorVibration = leftMotor;
+	m_RightMotorVibration = rightMotor;
+
+	XINPUT_VIBRATION _vibration = {};
+	_vibration.wLeftMotorSpeed = short(leftMotor * 655.35);
+	_vibration.wRightMotorSpeed = short(rightMotor * 655.35);
+	XInputSetState(m_PlayerID, &_vibration);
+}
+
+std::pair<int, int> Gamepad::GetVibration() const
+{
+	return {m_LeftMotorVibration, m_RightMotorVibration};
 }
 
 std::pair<float, float> Gamepad::LeftStick() const

@@ -269,6 +269,14 @@ void App::RenderControlSelectWindow(Graphics& gfx)
 			}
 			ImGui::EndCombo();
 		}
+
+		if (m_ControlType == ControlType::Gamepad)
+		{
+			ImGui::SliderInt("Left motor vibration percent: ", &m_LeftMotorVibration, 0, 100);
+			ImGui::SliderInt("Right motor vibration percent: ", &m_RightMotorVibration, 0, 100);
+			if (ImGui::Button("Apply"))
+				Gamepad::Get().SetVibration(m_LeftMotorVibration, m_RightMotorVibration);
+		}
 	}
 	ImGui::End();
 }
