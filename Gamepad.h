@@ -49,6 +49,9 @@ public:
 
 	// @ Check whether state of Gamepad has been changed since last UpdateState()
 	bool StateChanged() const;
+
+	void SetSensitivity(int sensitivity);
+	int GetSensitivity() const;
 private:
 	Gamepad();
 	XINPUT_STATE m_State = {};
@@ -56,5 +59,6 @@ private:
 	DWORD m_PrevDWPacketNumber;
 	int m_LeftMotorVibration = 0;
 	int m_RightMotorVibration = 0;
+	int m_Sensitivity = 0;
 	bool m_bStateChanged = false;
 };

@@ -39,6 +39,7 @@ private:
 
 	int m_LeftMotorVibration = 0;
 	int m_RightMotorVibration = 0;
+	int m_Sensitivity = 0;
 
 	ScriptCommander m_ScriptCommander;
 	RenderGraph::BlurOutlineRenderGraph m_RenderGraph{m_Window.Gfx()};

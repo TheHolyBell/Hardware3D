@@ -231,10 +231,11 @@ void App::HandleGamepad(float dt)
 		_Gamepad.UpdateState();
 		auto Left = _Gamepad.LeftStick();
 		auto Right = _Gamepad.RightStick();
+		m_Sensitivity = _Gamepad.GetSensitivity();
 
-		m_Camera.Rotate(Right.first * 10.0f, -Right.second * 10.0f);
+		m_Camera.Rotate(Right.first * m_Sensitivity, -Right.second * m_Sensitivity);
 
-		std::cout << "DeltaX: " << Right.first * 10.0f << " " << "DeltaY: " << -Right.second * 10.0f << std::endl;
+		std::cout << "DeltaX: " << Right.first * m_Sensitivity << " " << "DeltaY: " << -Right.second * m_Sensitivity << std::endl;
 
 		m_Camera.Translate({ Left.first * dt, 0.0f, Left.second * dt });
 
@@ -276,6 +277,8 @@ void App::RenderControlSelectWindow(Graphics& gfx)
 			ImGui::SliderInt("Right motor vibration percent: ", &m_RightMotorVibration, 0, 100);
 			if (ImGui::Button("Apply"))
 				Gamepad::Get().SetVibration(m_LeftMotorVibration, m_RightMotorVibration);
+			if (ImGui::SliderInt("Sensitivity", &m_Sensitivity, 5, 30))
+				Gamepad::Get().SetSensitivity(m_Sensitivity);
 		}
 	}
 	ImGui::End();

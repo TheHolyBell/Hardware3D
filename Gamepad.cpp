@@ -90,8 +90,18 @@ bool Gamepad::StateChanged() const
 	return m_bStateChanged;
 }
 
+void Gamepad::SetSensitivity(int sensitivity)
+{
+	m_Sensitivity = sensitivity;
+}
+
+int Gamepad::GetSensitivity() const
+{
+	return m_Sensitivity;
+}
+
 Gamepad::Gamepad()
-	: m_PlayerID(-1)
+	: m_PlayerID(-1), m_Sensitivity(15)
 {
 	for (int i = 0; i < XUSER_MAX_COUNT && m_PlayerID == -1; ++i)
 	{
