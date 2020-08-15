@@ -82,13 +82,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)/dxtex/include\dxtex;D:\VisualStudio\C++\Hardware3D\assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)/dxtex/bin/Debug;D:\VisualStudio\C++\Hardware3D\assimp\bin\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)/dxtex/include\dxtex;$(SolutionDir)\assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/dxtex/bin/Debug;$(SolutionDir)\assimp\bin\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)/dxtex/include/dxtex/;D:\VisualStudio\C++\Hardware3D\assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)/dxtex/bin/Release;D:\VisualStudio\C++\Hardware3D\assimp\bin\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)/dxtex/include/dxtex/;$(SolutionDir)\assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)/dxtex/bin/Release;$(SolutionDir)\assimp\bin\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
