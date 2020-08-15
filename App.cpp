@@ -239,9 +239,9 @@ void App::HandleGamepad(float dt)
 
 		m_Camera.Translate({ Left.first * dt, 0.0f, Left.second * dt });
 
-		if (_Gamepad.IsPressed(Button::GAMEPAD_A) || _Gamepad.IsPressed(Button::GAMEPAD_DPAD_UP))
+		if (_Gamepad.IsPressed(Button::GAMEPAD_A) || _Gamepad.IsPressed(Button::GAMEPAD_ARROW_UP))
 			m_Camera.Translate({ 0.0f, dt, 0.0f });
-		if (_Gamepad.IsPressed(Button::GAMEPAD_B) || _Gamepad.IsPressed(Button::GAMEPAD_DPAD_DOWN))
+		if (_Gamepad.IsPressed(Button::GAMEPAD_B) || _Gamepad.IsPressed(Button::GAMEPAD_ARROW_DOWN))
 			m_Camera.Translate({ 0.0f, -dt, 0.0f });
 	}
 }
