@@ -9,6 +9,7 @@
 #include "Source.h"
 #include <sstream>
 #include "EventDispatcher.h"
+#include "Surface.h"
 
 namespace RenderGraph
 {
@@ -94,6 +95,18 @@ namespace RenderGraph
 
 		// add to container of passes
 		m_Passes.push_back(std::move(pass));
+	}
+
+	Pass& RenderGraph::RenderGraph::FindPassByName(const std::string& name)
+	{
+		const auto i = std::find_if(m_Passes.begin(), m_Passes.end(), [&name](auto& p) {
+			return p->GetName() == name;
+			});
+		if (i == m_Passes.end())
+		{
+			throw std::runtime_error{ "Failed to find pass name" };
+		}
+		return **i;
 	}
 
 	void RenderGraph::LinkSinks(Pass& pass)
@@ -182,5 +195,9 @@ namespace RenderGraph
 			throw RGC_EXCEPTION("In RenderGraph::GetRenderQueue, pass was not RenderQueuePass: " + passName);
 		}
 		throw RGC_EXCEPTION("In RenderGraph::GetRenderQueue, pass not found: " + passName);
+	}
+	void RenderGraph::RenderGraph::StoreDepth(Graphics& gfx, const std::string& path)
+	{
+		m_pMasterDepth->ToSurface(gfx).Save(path);
 	}
 }

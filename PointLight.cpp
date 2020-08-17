@@ -1,10 +1,20 @@
 #include "PointLight.h"
 #include "ImGui\imgui.h"
 
-PointLight::PointLight(Graphics& gfx, float radius)
+PointLight::PointLight(Graphics& gfx, DirectX::XMFLOAT3 pos, float radius)
 	: m_Mesh(gfx, radius), m_CBuffer(gfx)
 {
+	m_Home = {
+		pos,
+		{ 0.05f,0.05f,0.05f },
+		{ 1.0f,1.0f,1.0f },
+		1.0f,
+		1.0f,
+		0.045f,
+		0.0075f,
+	};
 	Reset();
+	m_pCamera = std::make_shared<Camera>(gfx, "Light", m_cbData.pos, 0.0f, 0.0f, true);
 }
 
 void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
@@ -44,15 +54,7 @@ void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
 
 void PointLight::Reset() noexcept
 {
-	m_cbData = {
-		{ 10.0f,9.0f,2.5f },
-		{ 0.05f,0.05f,0.05f },
-		{ 1.0f,1.0f,1.0f },
-		1.0f,
-		1.0f,
-		0.045f,
-		0.0075f,
-	};
+	m_cbData = m_Home;
 }
 
 void PointLight::Bind(Graphics& gfx, DirectX::FXMMATRIX view) const noexcept
@@ -64,13 +66,18 @@ void PointLight::Bind(Graphics& gfx, DirectX::FXMMATRIX view) const noexcept
 	m_CBuffer.Bind(gfx);
 }
 
-void PointLight::Submit() const noxnd
+void PointLight::Submit(size_t channels) const noxnd
 {
 	m_Mesh.SetPos(m_cbData.pos);
-	m_Mesh.Submit();
+	m_Mesh.Submit(channels);
 }
 
 void PointLight::LinkTechniques(RenderGraph::RenderGraph& renderGraph)
 {
 	m_Mesh.LinkTechniques(renderGraph);
+}
+
+std::shared_ptr<Camera> PointLight::ShareCamera() const noexcept
+{
+	return m_pCamera;
 }

@@ -22,6 +22,7 @@
 #include "Node.h"
 #include "ChiliXM.h"
 #include "Gamepad.h"
+#include "Channels.h"
 
 #define PI 3.14159
 
@@ -88,6 +89,12 @@ App::App(int Width, int Height, const std::string& title, const std::string& com
 	m_Sponza.LinkTechniques(m_RenderGraph);
 	m_Gobber.LinkTechniques(m_RenderGraph);
 	m_Nano.LinkTechniques(m_RenderGraph);
+
+	Graphics& gfx = m_Window.Gfx();
+
+	m_CameraContainer.AddCamera(std::make_unique<Camera>(gfx, "Main", DirectX::XMFLOAT3{-13.5f, 5.0f, 3.5f}));
+	m_CameraContainer.AddCamera(std::make_unique<Camera>(gfx, "Reserved", DirectX::XMFLOAT3{-13.5f, 28.0f, -6.4f}));
+	m_CameraContainer.LinkTechniques(m_RenderGraph);
 }
 
 int App::Go()
@@ -119,13 +126,16 @@ void App::DoFrame(float dt)
 {
 	Graphics& gfx = m_Window.Gfx();
 	gfx.BeginFrame(0.07f, 0.0f, 0.12f);
-	gfx.SetCamera(m_Camera.GetMatrix());
-	m_Light.Bind(gfx, m_Camera.GetMatrix());
 
-	m_Light.Submit();
-	m_Sponza.Submit();
-	m_Gobber.Submit();
-	m_Nano.Submit();
+	m_Light.Bind(gfx, m_CameraContainer.GetActiveCamera().GetMatrix());
+	
+	m_CameraContainer.GetActiveCamera().BindToGraphics(gfx);
+
+	m_CameraContainer.Submit(Channels::main);
+	m_Light.Submit(Channels::main);
+	m_Sponza.Submit(Channels::main);
+	m_Gobber.Submit(Channels::main);
+	m_Nano.Submit(Channels::main);
 
 	m_RenderGraph.Execute(gfx);
 
@@ -136,7 +146,7 @@ void App::DoFrame(float dt)
 	_ModelProbe.SpawnWindow(m_Nano);
 	
 	
-	m_Camera.SpawnControlWindow();
+	m_CameraContainer.SpawnWindow(gfx);
 	m_Light.SpawnControlWindow(gfx);
 	m_RenderGraph.RenderWidgets(gfx);
 	RenderControlSelectWindow(gfx);
@@ -152,27 +162,27 @@ void App::HandleRawInput(float dt)
 	{
 		if (m_Window.g_Keyboard.KeyIsPressed('W'))
 		{
-			m_Camera.Translate({ 0.0f,0.0f,dt });
+			m_CameraContainer->Translate({ 0.0f,0.0f,dt });
 		}
 		if (m_Window.g_Keyboard.KeyIsPressed('A'))
 		{
-			m_Camera.Translate({ -dt,0.0f,0.0f });
+			m_CameraContainer->Translate({ -dt,0.0f,0.0f });
 		}
 		if (m_Window.g_Keyboard.KeyIsPressed('S'))
 		{
-			m_Camera.Translate({ 0.0f,0.0f,-dt });
+			m_CameraContainer->Translate({ 0.0f,0.0f,-dt });
 		}
 		if (m_Window.g_Keyboard.KeyIsPressed('D'))
 		{
-			m_Camera.Translate({ dt,0.0f,0.0f });
+			m_CameraContainer->Translate({ dt,0.0f,0.0f });
 		}
 		if (m_Window.g_Keyboard.KeyIsPressed(VK_SPACE))
 		{
-			m_Camera.Translate({ 0.0f,dt,0.0f });
+			m_CameraContainer->Translate({ 0.0f,dt,0.0f });
 		}
 		if (m_Window.g_Keyboard.KeyIsPressed(VK_SHIFT))
 		{
-			m_Camera.Translate({ 0.0f,-dt,0.0f });
+			m_CameraContainer->Translate({ 0.0f,-dt,0.0f });
 		}
 	}
 
@@ -181,7 +191,7 @@ void App::HandleRawInput(float dt)
 		if (!m_Window.CursorEnabled())
 		{
 			std::cout << "DeltaX: " << delta->x << " " << "DeltaY: " << delta->y << std::endl;
-			m_Camera.Rotate((float)delta->x, (float)delta->y);
+			m_CameraContainer->Rotate((float)delta->x, (float)delta->y);
 		}
 	}
 }
@@ -233,16 +243,16 @@ void App::HandleGamepad(float dt)
 		auto Right = _Gamepad.RightStick();
 		m_Sensitivity = _Gamepad.GetSensitivity();
 
-		m_Camera.Rotate(Right.first * m_Sensitivity, -Right.second * m_Sensitivity);
+		m_CameraContainer->Rotate(Right.first * m_Sensitivity * dt, -Right.second * m_Sensitivity * dt);
 
-		std::cout << "DeltaX: " << Right.first * m_Sensitivity << " " << "DeltaY: " << -Right.second * m_Sensitivity << std::endl;
+		std::cout << "DeltaX: " << Right.first  << " " << "DeltaY: " << Right.second  << std::endl;
 
-		m_Camera.Translate({ Left.first * dt, 0.0f, Left.second * dt });
+		m_CameraContainer->Translate({ Left.first * dt, 0.0f, Left.second * dt });
 
 		if (_Gamepad.IsPressed(Button::GAMEPAD_A) || _Gamepad.IsPressed(Button::GAMEPAD_ARROW_UP))
-			m_Camera.Translate({ 0.0f, dt, 0.0f });
+			m_CameraContainer->Translate({ 0.0f, dt, 0.0f });
 		if (_Gamepad.IsPressed(Button::GAMEPAD_B) || _Gamepad.IsPressed(Button::GAMEPAD_ARROW_DOWN))
-			m_Camera.Translate({ 0.0f, -dt, 0.0f });
+			m_CameraContainer->Translate({ 0.0f, -dt, 0.0f });
 	}
 }
 
@@ -277,7 +287,7 @@ void App::RenderControlSelectWindow(Graphics& gfx)
 			ImGui::SliderInt("Right motor vibration percent: ", &m_RightMotorVibration, 0, 100);
 			if (ImGui::Button("Apply"))
 				Gamepad::Get().SetVibration(m_LeftMotorVibration, m_RightMotorVibration);
-			if (ImGui::SliderInt("Sensitivity", &m_Sensitivity, 5, 30))
+			if (ImGui::SliderInt("Sensitivity", &m_Sensitivity, 1000, 2000))
 				Gamepad::Get().SetSensitivity(m_Sensitivity);
 		}
 	}

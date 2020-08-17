@@ -172,6 +172,8 @@ Dynamic::Buffer ShaderReflector::GetBufferByRegister(ID3DBlob* shaderByteCode, U
             _Layout.Add<Dynamic::Matrix>(_varDesc.Name);
         else if (_variableType == "bool")
             _Layout.Add<Dynamic::Bool>(_varDesc.Name);
+        else if (_variableType == "uint")
+            _Layout.Add<Dynamic::Integer>(_varDesc.Name);
 
     }
 

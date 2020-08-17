@@ -3,6 +3,7 @@
 #include "BufferResource.h"
 
 class Graphics;
+class Surface;
 
 namespace Bind
 {
@@ -12,22 +13,35 @@ namespace Bind
 	{
 		friend RenderTarget;
 	public:
+		enum class Usage
+		{
+			DepthStencil,
+			ShadowDepth,
+		};
+	public:
 		void BindAsBuffer(Graphics& gfx) noxnd override;
 		void BindAsBuffer(Graphics& gfx, BufferResource* renderTarget) noxnd override;
 		void BindAsBuffer(Graphics& gfx, RenderTarget* rt) noxnd;
 		void Clear(Graphics& gfx) noxnd override;
 		virtual void Resize(Graphics& gfx, UINT width, UINT height);
+	
+		Surface ToSurface(Graphics& gfx, bool linearlize = true) const;
+		unsigned int GetWidth() const;
+		unsigned int GetHeight() const;
 	protected:
 
-		DepthStencil(Graphics& gfx, UINT width, UINT height, bool canBindShaderInput);
+		DepthStencil(Graphics& gfx, UINT width, UINT height, bool canBindShaderInput, Usage usage);
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
+		UINT m_Width;
+		UINT m_Height;
 	};
 
+		  
 	class ShaderInputDepthStencil : public DepthStencil
 	{
 	public:
-		ShaderInputDepthStencil(Graphics& gfx, UINT slot);
-		ShaderInputDepthStencil(Graphics& gfx, UINT width, UINT height, UINT slot);
+		ShaderInputDepthStencil(Graphics& gfx, UINT slot, Usage usage = Usage::DepthStencil);
+		ShaderInputDepthStencil(Graphics& gfx, UINT width, UINT height, UINT slot, Usage usage = Usage::DepthStencil);
 		virtual void Bind(Graphics& gfx) noexcept override;
 		virtual void Resize(Graphics& gfx, UINT width, UINT height);
 	private:

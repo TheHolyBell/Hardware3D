@@ -64,6 +64,9 @@
     <Filter Include="Header Files\Render Queue System\PassLib">
       <UniqueIdentifier>{f19ae460-09b0-46b8-87eb-1c5211de71a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CameraSystem">
+      <UniqueIdentifier>{d3f034b7-137b-4eac-b930-da97eaf32c7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -149,9 +152,6 @@
     </ClCompile>
     <ClCompile Include="dxerr.cpp">
       <Filter>DxErr</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointLight.cpp">
       <Filter>Source Files</Filter>
@@ -297,6 +297,21 @@
     <ClCompile Include="Gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Projection.cpp">
+      <Filter>CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraIndicator.cpp">
+      <Filter>CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraContainer.cpp">
+      <Filter>CameraSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -421,9 +436,6 @@
     </ClInclude>
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dxerr.h">
       <Filter>DxErr</Filter>
@@ -850,6 +862,27 @@
     </ClInclude>
     <ClInclude Include="Gamepad.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraContainer.h">
+      <Filter>CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraIndicator.h">
+      <Filter>CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Channels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Projection.h">
+      <Filter>CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="WireframePass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

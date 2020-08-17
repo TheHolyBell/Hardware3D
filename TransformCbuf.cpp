@@ -12,31 +12,42 @@ namespace Bind
 		}
 	}
 
+	void TransformCbuf::Bind(Graphics& gfx) noexcept
+	{
+		INFOMAN_NOHR(gfx);
+		GFX_THROW_INFO_ONLY(UpdateBindImpl(gfx, GetTransforms(gfx)));
+	}
+
 	void TransformCbuf::InitializeParentReference(const Drawable& parent) noexcept
 	{
 		m_pParent = &parent;
 	}
 
-	void TransformCbuf::Bind(Graphics& gfx) noexcept
+	std::unique_ptr<CloningBindable> TransformCbuf::Clone() const noexcept
 	{
-		UpdateBindImpl(gfx, GetTransforms(gfx));
+		return std::make_unique<TransformCbuf>(*this);
 	}
 
-	void TransformCbuf::UpdateBindImpl(Graphics& gfx, const Transforms& tf) noexcept
+	void TransformCbuf::UpdateBindImpl(Graphics& gfx, const Transforms& tf) noxnd
 	{
+		assert(m_pParent != nullptr);
 		s_pVCBuffer->Update(gfx, tf);
 		s_pVCBuffer->Bind(gfx);
 	}
 
-	TransformCbuf::Transforms TransformCbuf::GetTransforms(Graphics& gfx) noexcept
+	TransformCbuf::Transforms TransformCbuf::GetTransforms(Graphics& gfx) noxnd
 	{
-		const auto modelView = m_pParent->GetTransformXM() * gfx.GetCamera();
+		assert(m_pParent != nullptr);
+		const auto model = m_pParent->GetTransformXM();
+		const auto modelView = model * gfx.GetCamera();
 		return {
+			DirectX::XMMatrixTranspose(model),
 			DirectX::XMMatrixTranspose(modelView),
 			DirectX::XMMatrixTranspose(
 				modelView *
-				gfx.GetProjection())
-			};
+				gfx.GetProjection()
+			)
+		};
 	}
 
 	std::unique_ptr<VertexConstantBuffer<TransformCbuf::Transforms>> TransformCbuf::s_pVCBuffer;

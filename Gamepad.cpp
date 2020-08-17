@@ -48,8 +48,8 @@ void Gamepad::SetVibration(int leftMotor, int rightMotor)
 	m_RightMotorVibration = rightMotor;
 
 	XINPUT_VIBRATION _vibration = {};
-	_vibration.wLeftMotorSpeed = short(leftMotor * 655.35);
-	_vibration.wRightMotorSpeed = short(rightMotor * 655.35);
+	_vibration.wLeftMotorSpeed = short(leftMotor * 655);
+	_vibration.wRightMotorSpeed = short(rightMotor * 655);
 	XInputSetState(m_PlayerID, &_vibration);
 }
 
@@ -63,8 +63,8 @@ std::pair<float, float> Gamepad::LeftStick() const
 	float normX = std::max(-1.0f, (float)m_State.Gamepad.sThumbLX / 32767);
 	float normY = std::max(-1.0f, (float)m_State.Gamepad.sThumbLY / 32767);
 
-	float deadzoneX = 0.1f;
-	float deadzoneY = 0.1f;
+	float deadzoneX = 0.13f;
+	float deadzoneY = 0.13f;
 
 	normX = (abs(normX) < deadzoneX ? 0 : normX);
 	normY = (abs(normY) < deadzoneY ? 0 : normY);
@@ -76,8 +76,8 @@ std::pair<float, float> Gamepad::RightStick() const
 {
 	float normX = std::max(-1.0f, (float)m_State.Gamepad.sThumbRX / 32767);
 	float normY = std::max(-1.0f, (float)m_State.Gamepad.sThumbRY / 32767);
-	float deadzoneX = 0.1f;
-	float deadzoneY = 0.1f;
+	float deadzoneX = 0.13f;
+	float deadzoneY = 0.13f;
 
 	normX = (abs(normX) < deadzoneX ? 0 : normX);
 	normY = (abs(normY) < deadzoneY ? 0 : normY);
@@ -101,7 +101,7 @@ int Gamepad::GetSensitivity() const
 }
 
 Gamepad::Gamepad()
-	: m_PlayerID(-1), m_Sensitivity(15)
+	: m_PlayerID(-1), m_Sensitivity(1500)
 {
 	for (int i = 0; i < XUSER_MAX_COUNT && m_PlayerID == -1; ++i)
 	{

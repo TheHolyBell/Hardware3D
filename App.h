@@ -8,7 +8,7 @@
 #include "Model.h"
 #include "ScriptCommander.h"
 #include "BlurOutlineRenderGraph.h"
-
+#include "CameraContainer.h"
 
 class App
 {
@@ -32,7 +32,7 @@ private:
 private:
 	ImguiManager m_ImGuiManager;
 	Window m_Window;
-	Camera m_Camera;
+	CameraContainer m_CameraContainer;
 	Timer m_Timer;
 	PointLight m_Light;
 	ControlType m_ControlType;

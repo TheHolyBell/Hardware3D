@@ -11,7 +11,8 @@ namespace Bind
 	VertexBuffer::VertexBuffer(Graphics& gfx, const std::string& tag, const Dynamic::VertexBuffer& vbuf)
 		:
 		m_Stride((UINT)vbuf.GetLayout().Size()),
-		m_Tag(tag)
+		m_Tag(tag),
+		m_Layout(vbuf.GetLayout())
 	{
 		INFOMAN(gfx);
 
@@ -27,10 +28,16 @@ namespace Bind
 		GFX_THROW_INFO(GetDevice(gfx)->CreateBuffer(&bd, &sd, &m_pVertexBuffer));
 	}
 
+	const Dynamic::VertexLayout& VertexBuffer::GetLayout() const noexcept
+	{
+		return m_Layout;
+	}
+
 	void VertexBuffer::Bind(Graphics& gfx) noexcept
 	{
 		const UINT offset = 0u;
-		GetContext(gfx)->IASetVertexBuffers(0u, 1u, m_pVertexBuffer.GetAddressOf(), &m_Stride, &offset);
+		INFOMAN_NOHR(gfx);
+		GFX_THROW_INFO_ONLY(GetContext(gfx)->IASetVertexBuffers(0u, 1u, m_pVertexBuffer.GetAddressOf(), &m_Stride, &offset));
 	}
 	std::shared_ptr<VertexBuffer> VertexBuffer::Resolve(Graphics& gfx, const std::string& tag,
 		const Dynamic::VertexBuffer& vbuf)

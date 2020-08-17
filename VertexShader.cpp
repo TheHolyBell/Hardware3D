@@ -15,10 +15,12 @@ namespace Bind
 	{
 		INFOMAN(gfx);
 
-		if (!std::filesystem::exists(path))
-			std::cout << path << " " << "Doesn't exits" << std::endl;
+		std::wstring _finalPath = ToWide("ShaderBins\\" + path);
 
-		GFX_THROW_INFO(D3DReadFileToBlob(ToWide("ShaderBins\\" + path).c_str(), &m_pByteCode));
+		if (!std::filesystem::exists(_finalPath))
+			std::wcout << _finalPath << " " << "Doesn't exits" << std::endl;
+
+		GFX_THROW_INFO(D3DReadFileToBlob(_finalPath.c_str(), &m_pByteCode));
 		GFX_THROW_INFO(GetDevice(gfx)->CreateVertexShader(
 			m_pByteCode->GetBufferPointer(),
 			m_pByteCode->GetBufferSize(),

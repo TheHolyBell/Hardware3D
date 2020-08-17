@@ -15,7 +15,7 @@ Node::Node(int id, const std::string& name, std::vector<Mesh*> meshPtrs, const D
 	dx::XMStoreFloat4x4(&m_AppliedTransform, dx::XMMatrixIdentity());
 }
 
-void Node::Submit(DirectX::FXMMATRIX accumulatedTransform) const noxnd
+void Node::Submit(size_t channels, DirectX::FXMMATRIX accumulatedTransform) const noxnd
 {
 	const auto built =
 		dx::XMLoadFloat4x4(&m_AppliedTransform) *
@@ -23,11 +23,11 @@ void Node::Submit(DirectX::FXMMATRIX accumulatedTransform) const noxnd
 		accumulatedTransform;
 	for (const auto pm : m_MeshPtrs)
 	{
-		pm->Submit(built);
+		pm->Submit(channels,built);
 	}
 	for (const auto& pc : m_ChildPtrs)
 	{
-		pc->Submit(built);
+		pc->Submit(channels, built);
 	}
 }
 

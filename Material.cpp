@@ -1,6 +1,7 @@
 #include "Material.h"
 #include "DynamicConstant.h"
 #include "ConstantBuffersEx.h"
+#include "Channels.h"
 #include "ShaderReflector.h"
 
 Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesystem::path& path) noxnd
@@ -16,7 +17,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 	}
 	// phong technique
 	{
-		Technique phong{ "Phong" };
+		Technique phong{ "Phong",Channels::main };
 		Step step("lambertian");
 		std::string shaderCode = "Phong";
 		aiString texFileName;
@@ -40,6 +41,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 				}
 				step.AddBindable(std::move(tex));
 			}
+
 			step.AddBindable(Rasterizer::Resolve(gfx, hasAlpha));
 		}
 		// specular
@@ -66,22 +68,18 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		{
 			step.AddBindable(std::make_shared<TransformCbuf>(gfx, 0u));
 			auto pvs = VertexShader::Resolve(gfx, shaderCode + "_VS.cso");
-			auto pvsbc = pvs->GetByteCode();
-			
-			m_vtxLayout = ShaderReflector::GetLayoutFromShader(pvsbc);
+			m_vtxLayout = ShaderReflector::GetLayoutFromShader(pvs->GetByteCode());
 			step.AddBindable(InputLayout::Resolve(gfx, m_vtxLayout, *pvs));
 			step.AddBindable(std::move(pvs));
 
 			auto pps = PixelShader::Resolve(gfx, shaderCode + "_PS.cso");
-			auto ppsbc = pps->GetByteCode();
-			step.AddBindable(std::move(pps));
-			
+			step.AddBindable(pps);
 			if (hasTexture)
 			{
 				step.AddBindable(Bind::Sampler::Resolve(gfx));
 			}
 			// PS material params (cbuf)
-			Dynamic::Buffer buf = ShaderReflector::GetBufferByRegister(ppsbc, 1);
+			Dynamic::Buffer buf = ShaderReflector::GetBufferByRegister(pps->GetByteCode(), 1);
 			if (auto r = buf["materialColor"]; r.Exists())
 			{
 				aiColor3D color = { 0.45f,0.45f,0.85f };
@@ -112,7 +110,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 	}
 	// outline technique
 	{
-		Technique outline("Outline", false);
+		Technique outline{ "Outline",Channels::main,false };
 		{
 			Step mask("outlineMask");
 
@@ -137,7 +135,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			}
 
 			// TODO: better sub-layout generation tech for future consideration maybe
-			draw.AddBindable(InputLayout::Resolve(gfx, m_vtxLayout, *VertexShader::Resolve(gfx,"Solid_VS.cso")));
+			draw.AddBindable(InputLayout::Resolve(gfx, m_vtxLayout, *VertexShader::Resolve(gfx, "Solid_VS.cso")));
 
 			draw.AddBindable(std::make_shared<TransformCbuf>(gfx));
 
@@ -147,6 +145,23 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		}
 		m_Techniques.push_back(std::move(outline));
 	}
+	// shadow map technique
+	//{
+	//	Technique map{ "ShadowMap",Chan::shadow,true };
+	//	{
+	//		Step draw( "shadowMap" );
+
+	//		// TODO: better sub-layout generation tech for future consideration maybe
+	//		draw.AddBindable( InputLayout::Resolve( gfx,vtxLayout,*VertexShader::Resolve( gfx,"Solid_VS.cso" ) ) );
+
+	//		draw.AddBindable( std::make_shared<TransformCbuf>( gfx ) );
+
+	//		// TODO: might need to specify rasterizer when doubled-sided models start being used
+
+	//		map.AddStep( std::move( draw ) );
+	//	}
+	//	techniques.push_back( std::move( map ) );
+	//}
 }
 Dynamic::VertexBuffer Material::ExtractVertices(const aiMesh& mesh) const noexcept
 {
