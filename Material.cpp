@@ -41,7 +41,6 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 				}
 				step.AddBindable(std::move(tex));
 			}
-
 			step.AddBindable(Rasterizer::Resolve(gfx, hasAlpha));
 		}
 		// specular
@@ -62,6 +61,7 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 				hasTexture = true;
 				shaderCode += "Nrm";
 				step.AddBindable(Texture::Resolve(gfx, rootPath + texFileName.C_Str(), 2));
+
 			}
 		}
 		// common (post)
@@ -69,10 +69,12 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 			step.AddBindable(std::make_shared<TransformCbuf>(gfx, 0u));
 			auto pvs = VertexShader::Resolve(gfx, shaderCode + "_VS.cso");
 			m_vtxLayout = ShaderReflector::GetLayoutFromShader(pvs->GetByteCode());
+
 			step.AddBindable(InputLayout::Resolve(gfx, m_vtxLayout, *pvs));
 			step.AddBindable(std::move(pvs));
 
 			auto pps = PixelShader::Resolve(gfx, shaderCode + "_PS.cso");
+
 			step.AddBindable(pps);
 			if (hasTexture)
 			{
@@ -146,22 +148,22 @@ Material::Material(Graphics& gfx, const aiMaterial& material, const std::filesys
 		m_Techniques.push_back(std::move(outline));
 	}
 	// shadow map technique
-	//{
-	//	Technique map{ "ShadowMap",Chan::shadow,true };
-	//	{
-	//		Step draw( "shadowMap" );
+	{
+		Technique map{ "ShadowMap",Channels::shadow,true };
+		{
+			Step draw( "shadowMap" );
 
-	//		// TODO: better sub-layout generation tech for future consideration maybe
-	//		draw.AddBindable( InputLayout::Resolve( gfx,vtxLayout,*VertexShader::Resolve( gfx,"Solid_VS.cso" ) ) );
+			// TODO: better sub-layout generation tech for future consideration maybe
+			draw.AddBindable( InputLayout::Resolve( gfx,m_vtxLayout,*VertexShader::Resolve( gfx,"Solid_VS.cso" ) ) );
 
-	//		draw.AddBindable( std::make_shared<TransformCbuf>( gfx ) );
+			draw.AddBindable( std::make_shared<TransformCbuf>( gfx ) );
 
-	//		// TODO: might need to specify rasterizer when doubled-sided models start being used
+			// TODO: might need to specify rasterizer when doubled-sided models start being used
 
-	//		map.AddStep( std::move( draw ) );
-	//	}
-	//	techniques.push_back( std::move( map ) );
-	//}
+			map.AddStep( std::move( draw ) );
+		}
+		m_Techniques.push_back( std::move( map ) );
+	}
 }
 Dynamic::VertexBuffer Material::ExtractVertices(const aiMesh& mesh) const noexcept
 {

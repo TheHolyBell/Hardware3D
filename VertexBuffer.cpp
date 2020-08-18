@@ -33,7 +33,7 @@ namespace Bind
 		return m_Layout;
 	}
 
-	void VertexBuffer::Bind(Graphics& gfx) noexcept
+	void VertexBuffer::Bind(Graphics& gfx) noxnd
 	{
 		const UINT offset = 0u;
 		INFOMAN_NOHR(gfx);

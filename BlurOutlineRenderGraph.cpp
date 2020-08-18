@@ -8,10 +8,11 @@
 #include "VerticalBlurPass.h"
 #include "BlurOutlineDrawingPass.h"
 #include "WireframePass.h"
+#include "ShadowMappingPass.h"
 #include "RenderTarget.h"
 #include "DynamicConstant.h"
+#include "imgui/imgui.h"
 #include "ChiliMath.h"
-#include "ImGui/imgui.h"
 
 namespace RenderGraph
 {
@@ -30,7 +31,12 @@ namespace RenderGraph
 			AppendPass(std::move(pass));
 		}
 		{
+			auto pass = std::make_unique<ShadowMappingPass>(gfx, "shadowMap");
+			AppendPass(std::move(pass));
+		}
+		{
 			auto pass = std::make_unique<LambertianPass>(gfx, "lambertian");
+			pass->SetSinkLinkage("shadowMap", "shadowMap.map");
 			pass->SetSinkLinkage("renderTarget", "clearRT.buffer");
 			pass->SetSinkLinkage("depthStencil", "clearDS.buffer");
 			AppendPass(std::move(pass));
@@ -93,58 +99,6 @@ namespace RenderGraph
 		Finalize();
 	}
 
-	void BlurOutlineRenderGraph::RenderWidgets(Graphics& gfx)
-	{
-		if (ImGui::Begin("Kernel"))
-		{
-			bool _bFilterChanged = false;
-			{
-				const char* items[] = { "Gauss","Box" };
-				static const char* _CurItem = items[0];
-				if (ImGui::BeginCombo("Filter Type", _CurItem))
-				{
-					for (int n = 0; n < std::size(items); n++)
-					{
-						const bool isSelected = (_CurItem == items[n]);
-						if (ImGui::Selectable(items[n], isSelected))
-						{
-							_bFilterChanged = true;
-							_CurItem = items[n];
-							if (_CurItem == items[0])
-							{
-								m_KernelType = KernelType::Gauss;
-							}
-							else if (_CurItem == items[1])
-							{
-								m_KernelType = KernelType::Box;
-							}
-						}
-						if (isSelected)
-						{
-							ImGui::SetItemDefaultFocus();
-						}
-					}
-					ImGui::EndCombo();
-				}
-			}
-
-			bool _bRadChange = ImGui::SliderInt("Radius", &m_Radius, 0, s_MaxRadius);
-			bool _bSigChange = ImGui::SliderFloat("Sigma", &m_Sigma, 0.1f, 10.0f);
-			if (_bRadChange || _bSigChange || _bFilterChanged)
-			{
-				if (m_KernelType == KernelType::Gauss)
-				{
-					SetKernelGauss(m_Radius, m_Sigma);
-				}
-				else if (m_KernelType == KernelType::Box)
-				{
-					SetKernelBox(m_Radius);
-				}
-			}
-		}
-		ImGui::End();
-	}
-
 	void BlurOutlineRenderGraph::SetKernelGauss(int radius, float sigma) noxnd
 	{
 		assert(radius <= s_MaxRadius);
@@ -168,13 +122,81 @@ namespace RenderGraph
 
 	void BlurOutlineRenderGraph::SetKernelBox(int radius) noxnd
 	{
-		assert(m_Radius <= s_MaxRadius);
+		assert(radius <= s_MaxRadius);
 		auto k = m_BlurKernel->GetBuffer();
-		const int nTaps = m_Radius * 2 + 1;
+		const int nTaps = radius * 2 + 1;
 		k["nTaps"] = nTaps;
 		const float c = 1.0f / nTaps;
-		for (int i = 0; i < nTaps; ++i)
+		for (int i = 0; i < nTaps; i++)
+		{
 			k["coefficients"][i] = c;
+		}
 		m_BlurKernel->SetBuffer(k);
+	}
+
+	void BlurOutlineRenderGraph::RenderWidgets(Graphics& gfx)
+	{
+		if (ImGui::Begin("Kernel"))
+		{
+			bool filterChanged = false;
+			{
+				const char* items[] = { "Gauss","Box" };
+				static const char* curItem = items[0];
+				if (ImGui::BeginCombo("Filter Type", curItem))
+				{
+					for (int n = 0; n < std::size(items); n++)
+					{
+						const bool isSelected = (curItem == items[n]);
+						if (ImGui::Selectable(items[n], isSelected))
+						{
+							filterChanged = true;
+							curItem = items[n];
+							if (curItem == items[0])
+							{
+								m_KernelType = KernelType::Gauss;
+							}
+							else if (curItem == items[1])
+							{
+								m_KernelType = KernelType::Box;
+							}
+						}
+						if (isSelected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
+				}
+			}
+
+			bool radChange = ImGui::SliderInt("Radius", &m_Radius, 0, s_MaxRadius);
+			bool sigChange = ImGui::SliderFloat("Sigma", &m_Sigma, 0.1f, 10.0f);
+			if (radChange || sigChange || filterChanged)
+			{
+				if (m_KernelType == KernelType::Gauss)
+				{
+					SetKernelGauss(m_Radius, m_Sigma);
+				}
+				else if (m_KernelType == KernelType::Box)
+				{
+					SetKernelBox(m_Radius);
+				}
+			}
+		}
+		ImGui::End();
+	}
+	void BlurOutlineRenderGraph::DumpShadowMap(Graphics& gfx, const std::string& path)
+	{
+		dynamic_cast<ShadowMappingPass&>(FindPassByName("shadowMap")).DumpShadowMap(gfx, path);
+	}
+	
+	void BlurOutlineRenderGraph::BindMainCamera(Camera& cam)
+	{
+		dynamic_cast<LambertianPass&>(FindPassByName("lambertian")).BindMainCamera(cam);
+	}
+	void BlurOutlineRenderGraph::BindShadowCamera(Camera& cam)
+	{
+		dynamic_cast<ShadowMappingPass&>(FindPassByName("shadowMap")).BindShadowCamera(cam);
+		dynamic_cast<LambertianPass&>(FindPassByName("lambertian")).BindShadowCamera(cam);
 	}
 }

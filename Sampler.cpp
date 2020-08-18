@@ -29,7 +29,7 @@ namespace Bind
 		GFX_THROW_INFO(GetDevice(gfx)->CreateSamplerState(&samplerDesc, &m_pSampler));
 	}
 
-	void Sampler::Bind(Graphics& gfx) noexcept
+	void Sampler::Bind(Graphics& gfx) noxnd
 	{
 		INFOMAN_NOHR(gfx);
 		GetContext(gfx)->PSSetSamplers(0, 1, m_pSampler.GetAddressOf());

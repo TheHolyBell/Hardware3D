@@ -10,7 +10,7 @@ namespace Bind
 	public:
 		Rasterizer(Graphics& gfx, bool twoSided);
 
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 
 		static std::shared_ptr<Rasterizer> Resolve(Graphics& gfx, bool twoSided);

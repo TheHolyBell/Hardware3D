@@ -9,7 +9,7 @@ namespace Bind
 	public:
 		PixelShader(Graphics& gfx, const std::string& path);
 
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 
 		ID3DBlob* GetByteCode() const noexcept;

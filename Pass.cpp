@@ -11,7 +11,7 @@ namespace RenderGraph
 {
 	Pass::Pass(const std::string& name) noexcept
 		:
-		m_Name(name)
+		m_Name(std::move(name))
 	{}
 
 	void Pass::Reset() noxnd

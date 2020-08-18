@@ -16,7 +16,7 @@ namespace Bind
 		};
 	public:
 		Sampler(Graphics& gfx, Type type, bool reflect);
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		static std::shared_ptr<Sampler> Resolve(Graphics& gfx, Type type = Type::Anisotropic, bool reflect = false);
 		static std::string GenerateUID(Type type, bool reflect);
 		virtual std::string GetUID() const noexcept override;

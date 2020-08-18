@@ -22,10 +22,8 @@ namespace RenderGraph
 	{
 	public:
 		Pass(const std::string& name) noexcept;
-
 		virtual void Execute(Graphics& gfx) const noxnd = 0;
 		virtual void Reset() noxnd;
-
 		const std::string& GetName() const noexcept;
 		const std::vector<std::unique_ptr<Sink>>& GetSinks() const;
 		Source& GetSource(const std::string& registeredName) const;

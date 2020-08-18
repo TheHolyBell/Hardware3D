@@ -10,7 +10,7 @@ namespace Bind
 	public:
 		Texture(Graphics& gfx, const std::string& path, UINT slot = 0);
 
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 
 		static std::shared_ptr<Texture> Resolve(Graphics& gfx, const std::string& path, UINT slot = 0);

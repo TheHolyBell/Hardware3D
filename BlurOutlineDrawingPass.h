@@ -17,9 +17,9 @@ namespace RenderGraph
 	class BlurOutlineDrawingPass : public RenderQueuePass
 	{
 	public:
-		BlurOutlineDrawingPass(Graphics& gfx, const std::string& name, unsigned int fullWidth, unsigned int fullHeight)
+		BlurOutlineDrawingPass(Graphics& gfx, std::string name, unsigned int fullWidth, unsigned int fullHeight)
 			:
-			RenderQueuePass(name)
+			RenderQueuePass(std::move(name))
 		{
 			using namespace Bind;
 			m_RenderTarget = std::make_unique<ShaderInputRenderTarget>(gfx, fullWidth / 2, fullHeight / 2, 0);

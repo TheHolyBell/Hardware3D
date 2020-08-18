@@ -10,6 +10,7 @@
 #include <sstream>
 #include "EventDispatcher.h"
 #include "Surface.h"
+#include <iostream>
 
 namespace RenderGraph
 {
@@ -22,11 +23,6 @@ namespace RenderGraph
 		AddGlobalSource(DirectBufferSource<Bind::RenderTarget>::Make("backbuffer", m_pBackBufferTarget));
 		AddGlobalSource(DirectBufferSource<Bind::DepthStencil>::Make("masterDepth", m_pMasterDepth));
 		AddGlobalSink(DirectBufferSink<Bind::RenderTarget>::Make("backbuffer", m_pBackBufferTarget));
-
-		EventDispatcher::RegisterOnResize([&](int Width, int Height) 
-		{ 
-			m_pMasterDepth->Resize(gfx, Width, Height); 
-		});
 	}
 
 	RenderGraph::~RenderGraph()
@@ -65,6 +61,7 @@ namespace RenderGraph
 		assert(m_bFinalized);
 		for (auto& p : m_Passes)
 		{
+			std::cout << p->GetName() << std::endl;
 			p->Execute(gfx);
 		}
 	}
@@ -97,7 +94,7 @@ namespace RenderGraph
 		m_Passes.push_back(std::move(pass));
 	}
 
-	Pass& RenderGraph::RenderGraph::FindPassByName(const std::string& name)
+	Pass& RenderGraph::FindPassByName(const std::string& name)
 	{
 		const auto i = std::find_if(m_Passes.begin(), m_Passes.end(), [&name](auto& p) {
 			return p->GetName() == name;
@@ -114,6 +111,13 @@ namespace RenderGraph
 		for (auto& si : pass.GetSinks())
 		{
 			const auto& inputSourcePassName = si->GetPassName();
+
+			if (inputSourcePassName.empty())
+			{
+				std::ostringstream oss;
+				oss << "In pass named [" << pass.GetName() << "] sink named [" << si->GetRegisteredName() << "] has no target source set.";
+				throw RGC_EXCEPTION(oss.str());
+			}
 
 			// check check whether target source is global
 			if (inputSourcePassName == "$")
@@ -137,14 +141,22 @@ namespace RenderGraph
 			}
 			else // find source from within existing passes
 			{
+				bool bound = false;
 				for (auto& existingPass : m_Passes)
 				{
 					if (existingPass->GetName() == inputSourcePassName)
 					{
 						auto& source = existingPass->GetSource(si->GetOutputName());
 						si->Bind(source);
+						bound = true;
 						break;
 					}
+				}
+				if (!bound)
+				{
+					std::ostringstream oss;
+					oss << "Pass named [" << inputSourcePassName << "] not found";
+					throw RGC_EXCEPTION(oss.str());
 				}
 			}
 		}
@@ -196,7 +208,7 @@ namespace RenderGraph
 		}
 		throw RGC_EXCEPTION("In RenderGraph::GetRenderQueue, pass not found: " + passName);
 	}
-	void RenderGraph::RenderGraph::StoreDepth(Graphics& gfx, const std::string& path)
+	void RenderGraph::StoreDepth(Graphics& gfx, const std::string& path)
 	{
 		m_pMasterDepth->ToSurface(gfx).Save(path);
 	}

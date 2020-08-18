@@ -35,7 +35,7 @@ public:
 	Drawable(Drawable&& rhs) = delete;
 	Drawable& operator=(Drawable&& rhs) = delete;
 
-	void AddTechnique(Technique tech) noexcept;
+	void AddTechnique(Technique tech_in) noexcept;
 	virtual DirectX::XMMATRIX GetTransformXM() const noexcept = 0;
 	void Submit(size_t channelFilter) const noexcept;
 	void Bind(Graphics& gfx) const noxnd;

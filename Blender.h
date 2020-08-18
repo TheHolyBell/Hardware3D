@@ -11,7 +11,7 @@ namespace Bind
 	public:
 		Blender(Graphics& gfx, bool blending, std::optional<float> factor = {});
 		
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 
 		void SetFactor(float factor) noxnd;

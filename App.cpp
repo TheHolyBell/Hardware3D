@@ -24,6 +24,8 @@
 #include "Gamepad.h"
 #include "Channels.h"
 
+#include "ShadowMappingPass.h"
+
 #define PI 3.14159
 
 namespace dx = DirectX;
@@ -85,16 +87,33 @@ App::App(int Width, int Height, const std::string& title, const std::string& com
 	: m_Window(Width, Height, title.c_str()), m_Light(m_Window.Gfx()), m_ScriptCommander(TokenizeQuoted(commandLine)),
 	m_ControlType(ControlType::RawInput)
 {
+	Graphics& gfx = m_Window.Gfx();
+
+	m_Cube.SetPos({ 10.0f,5.0f,6.0f });
+	m_Cube2.SetPos({ 10.0f,5.0f,14.0f });
+
+	m_CameraContainer.AddCamera(std::make_unique<Camera>(gfx, "A", dx::XMFLOAT3{ -13.5f,6.0f,3.5f }, 0.0f, PI / 2.0f));
+	m_CameraContainer.AddCamera(std::make_unique<Camera>(gfx, "B", dx::XMFLOAT3{ -13.5f,28.8f,-6.4f }, PI / 180.0f * 13.0f, PI / 180.0f * 61.0f));
+	m_CameraContainer.AddCamera(m_Light.ShareCamera());
+
+	m_Nano.SetRootTransform(
+		dx::XMMatrixRotationY(PI / 2.f) *
+		dx::XMMatrixTranslation(27.f, -0.56f, 1.7f)
+	);
+	m_Gobber.SetRootTransform(
+		dx::XMMatrixRotationY(-PI / 2.f) *
+		dx::XMMatrixTranslation(-8.f, 10.f, 0.f)
+	);
+
 	m_Light.LinkTechniques(m_RenderGraph);
 	m_Sponza.LinkTechniques(m_RenderGraph);
 	m_Gobber.LinkTechniques(m_RenderGraph);
 	m_Nano.LinkTechniques(m_RenderGraph);
-
-	Graphics& gfx = m_Window.Gfx();
-
-	m_CameraContainer.AddCamera(std::make_unique<Camera>(gfx, "Main", DirectX::XMFLOAT3{-13.5f, 5.0f, 3.5f}));
-	m_CameraContainer.AddCamera(std::make_unique<Camera>(gfx, "Reserved", DirectX::XMFLOAT3{-13.5f, 28.0f, -6.4f}));
+	m_Cube.LinkTechniques(m_RenderGraph);
+	m_Cube2.LinkTechniques(m_RenderGraph);
 	m_CameraContainer.LinkTechniques(m_RenderGraph);
+
+	m_RenderGraph.BindShadowCamera(*m_Light.ShareCamera());
 }
 
 int App::Go()
@@ -126,18 +145,38 @@ void App::DoFrame(float dt)
 {
 	Graphics& gfx = m_Window.Gfx();
 	gfx.BeginFrame(0.07f, 0.0f, 0.12f);
-
-	m_Light.Bind(gfx, m_CameraContainer.GetActiveCamera().GetMatrix());
-	
-	m_CameraContainer.GetActiveCamera().BindToGraphics(gfx);
+	m_Light.Bind(gfx, m_CameraContainer->GetMatrix());
+	m_RenderGraph.BindMainCamera(m_CameraContainer.GetActiveCamera());
 
 	m_CameraContainer.Submit(Channels::main);
 	m_Light.Submit(Channels::main);
+	m_Cube.Submit(Channels::main);
+	m_Cube2.Submit(Channels::main);
 	m_Sponza.Submit(Channels::main);
 	m_Gobber.Submit(Channels::main);
 	m_Nano.Submit(Channels::main);
 
+
+	//m_Sponza.Submit(Channels::shadow);
+	m_Cube.Submit(Channels::shadow);
+	m_Cube2.Submit(Channels::shadow);
+	m_Gobber.Submit(Channels::shadow);
+	m_Nano.Submit(Channels::shadow);
+	m_Sponza.Submit(Channels::shadow);
+
 	m_RenderGraph.Execute(gfx);
+
+	if (m_bSavingShadow)
+	{
+		m_RenderGraph.DumpShadowMap(gfx, "shadow.png");
+		m_bSavingShadow = false;
+	}
+
+	if (m_bSavingDepth)
+	{
+		m_RenderGraph.StoreDepth(gfx, "depth.png");
+		m_bSavingDepth = false;
+	}
 
 	static MP _ModelProbe;
 
@@ -149,6 +188,10 @@ void App::DoFrame(float dt)
 	m_CameraContainer.SpawnWindow(gfx);
 	m_Light.SpawnControlWindow(gfx);
 	m_RenderGraph.RenderWidgets(gfx);
+
+	m_Cube.SpawnControlWindow(gfx, "Cube 1");
+	m_Cube2.SpawnControlWindow(gfx, "Cube 2");
+
 	RenderControlSelectWindow(gfx);
 
 	gfx.EndFrame();
@@ -218,6 +261,12 @@ void App::HandleInput(float dt)
 				m_Window.EnableCursor();
 				m_Window.g_Mouse.DisableRaw();
 			}
+			break;
+		case VK_DELETE:
+			m_bSavingDepth = true;
+			break;
+		case VK_INSERT:
+			m_bSavingShadow = true;
 			break;
 		}
 	}
@@ -291,5 +340,9 @@ void App::RenderControlSelectWindow(Graphics& gfx)
 				Gamepad::Get().SetSensitivity(m_Sensitivity);
 		}
 	}
+
+	ImGui::Image((ImTextureID)dynamic_cast<RenderGraph::ShadowMappingPass&>(m_RenderGraph.FindPassByName("shadowMap")).GetUnderlyingHandle(),
+		ImVec2{ 200, 200 });
+
 	ImGui::End();
 }

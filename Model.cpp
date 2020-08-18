@@ -14,9 +14,8 @@ Model::Model(Graphics& gfx, const std::string& pathString, const float scale)
 {
 	m_Name = std::filesystem::path(pathString).filename().string();
 
-
 	Assimp::Importer _Importer;
-	const auto pScene = _Importer.ReadFile(pathString,
+	const auto pScene = _Importer.ReadFile(pathString.c_str(),
 		aiProcess_Triangulate |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_ConvertToLeftHanded |
@@ -25,20 +24,22 @@ Model::Model(Graphics& gfx, const std::string& pathString, const float scale)
 	);
 
 	if (pScene == nullptr)
-		throw ModelException(__LINE__, __FILE__, _Importer.GetErrorString());
-
-	// Parse materials
-	std::vector<Material> _Materials;
-	_Materials.reserve(pScene->mNumMaterials);
-	for (size_t i = 0; i < pScene->mNumMaterials; ++i)
 	{
-		_Materials.emplace_back(gfx, *pScene->mMaterials[i], pathString);
+		throw ModelException(__LINE__, __FILE__, _Importer.GetErrorString());
 	}
 
-	for (size_t i = 0; i < pScene->mNumMeshes; ++i)
+	// parse materials
+	std::vector<Material> materials;
+	materials.reserve(pScene->mNumMaterials);
+	for (size_t i = 0; i < pScene->mNumMaterials; i++)
+	{
+		materials.emplace_back(gfx, *pScene->mMaterials[i], pathString);
+	}
+
+	for (size_t i = 0; i < pScene->mNumMeshes; i++)
 	{
 		const auto& mesh = *pScene->mMeshes[i];
-		m_MeshPtrs.push_back(std::make_unique<Mesh>(gfx, _Materials[mesh.mMaterialIndex], mesh, scale));
+		m_MeshPtrs.push_back(std::make_unique<Mesh>(gfx, materials[mesh.mMaterialIndex], mesh, scale));
 	}
 
 	int nextId = 0;
@@ -47,7 +48,7 @@ Model::Model(Graphics& gfx, const std::string& pathString, const float scale)
 
 void Model::Submit(size_t channels) const noxnd
 {
-	m_pRoot->Submit(channels,dx::XMMatrixIdentity());
+	m_pRoot->Submit(channels, dx::XMMatrixIdentity());
 }
 
 void Model::SetRootTransform(DirectX::FXMMATRIX tf) noexcept
@@ -60,10 +61,12 @@ void Model::Accept(ModelProbe& probe)
 	m_pRoot->Accept(probe);
 }
 
-void Model::LinkTechniques(RenderGraph::RenderGraph& renderGraph)
+void Model::LinkTechniques(RenderGraph::RenderGraph& rg)
 {
 	for (auto& pMesh : m_MeshPtrs)
-		pMesh->LinkTechniques(renderGraph);
+	{
+		pMesh->LinkTechniques(rg);
+	}
 }
 
 std::string Model::GetName() const

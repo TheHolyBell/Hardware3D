@@ -9,7 +9,7 @@ namespace Bind
 	public:
 		NullPixelShader(Graphics& gfx);
 
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 
 		static std::shared_ptr<NullPixelShader> Resolve(Graphics& gfx);

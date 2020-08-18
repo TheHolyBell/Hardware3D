@@ -78,8 +78,6 @@ Graphics::Graphics(Window& window)
 
 	m_pImmediateContext->RSSetViewports(1, &vp);
 
-	m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, (float)m_Width / (float)m_Height, 1.0f, 3000.0f);
-
 	ImGui_ImplDX11_Init(m_pDevice.Get(), m_pImmediateContext.Get());
 
 	EventDispatcher::RegisterOnResize([this](int Width, int Height) {OnResize(Width, Height); });
@@ -183,7 +181,7 @@ void Graphics::OnResize(int Width, int Height)
 
 	HRESULT hr;
 
-	m_pTarget->ReleaseBuffer();
+	//m_pTarget->ReleaseBuffer();
 	try
 	{
 		GFX_THROW_INFO(m_pSwapChain->ResizeBuffers(1, Width, Height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
@@ -195,7 +193,7 @@ void Graphics::OnResize(int Width, int Height)
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> _pBackbuffer;
 	GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_pBackbuffer));
 	//m_pTarget = std::shared_ptr<Bind::RenderTarget>(new Bind::OutputOnlyRenderTarget(*this, _pBackbuffer.Get()));
-	m_pTarget->Reset(*this, _pBackbuffer.Get());
+	//m_pTarget->Reset(*this, _pBackbuffer.Get());
 
 	D3D11_VIEWPORT vp = {};
 	vp.Width = Width;

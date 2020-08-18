@@ -68,7 +68,7 @@ namespace Bind
 		using Bindable::GetContext;
 	public:
 		using ConstantBuffer<C>::ConstantBuffer;
-		void Bind(Graphics& gfx) noexcept override
+		void Bind(Graphics& gfx) noxnd override
 		{
 			GetContext(gfx)->VSSetConstantBuffers(m_Slot, 1u, m_pConstantBuffer.GetAddressOf());
 		}
@@ -103,7 +103,7 @@ namespace Bind
 		using Bindable::GetContext;
 	public:
 		using ConstantBuffer<C>::ConstantBuffer;
-		void Bind(Graphics& gfx) noexcept override
+		void Bind(Graphics& gfx) noxnd override
 		{
 			GetContext(gfx)->PSSetConstantBuffers(m_Slot, 1u, m_pConstantBuffer.GetAddressOf());
 		}

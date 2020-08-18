@@ -19,7 +19,7 @@ public:
 	int GetId() const noexcept;
 	bool HasChildren() const noexcept
 	{
-		return m_ChildPtrs.size() > 0;
+		return !m_ChildPtrs.empty();
 	}
 	void Accept(ModelProbe& probe);
 	void Accept(TechniqueProbe& probe);

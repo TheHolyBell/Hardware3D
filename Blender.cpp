@@ -60,7 +60,7 @@ namespace Bind
 		return m_Factors->front();
 	}
 
-	void Blender::Bind(Graphics& gfx) noexcept
+	void Blender::Bind(Graphics& gfx) noxnd
 	{
 		const float* data = m_Factors ? m_Factors->data() : nullptr;
 		GetContext(gfx)->OMSetBlendState(m_pBlendState.Get(), data, 0xFFFFFFFF);

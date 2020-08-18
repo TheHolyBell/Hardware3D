@@ -12,18 +12,11 @@ namespace Bind
 	class RenderTarget : public Bindable, public BufferResource
 	{
 	public:
-
-		virtual void BindAsBuffer(Graphics& gfx) noxnd override;
-		virtual void BindAsBuffer(Graphics& gfx, BufferResource* depthStencil) noxnd override;
-		virtual void BindAsBuffer(Graphics& gfx, DepthStencil* depthStencil) noxnd;
-		virtual void Clear(Graphics& gfx) noxnd override;
-		virtual void Clear(Graphics& gfx, const std::array<float, 4>& color) noxnd;
-		
-		virtual void Resize(Graphics& gfx, UINT width, UINT height);
-
-		void Reset(Graphics& gfx, ID3D11Texture2D* pTexture);
-		void ReleaseBuffer();
-
+		void BindAsBuffer(Graphics& gfx) noxnd override;
+		void BindAsBuffer(Graphics& gfx, BufferResource* depthStencil) noxnd override;
+		void BindAsBuffer(Graphics& gfx, DepthStencil* depthStencil) noxnd;
+		void Clear(Graphics& gfx) noxnd override;
+		void Clear(Graphics& gfx, const std::array<float, 4>& color) noxnd;
 		UINT GetWidth() const noexcept;
 		UINT GetHeight() const noexcept;
 	private:
@@ -31,22 +24,16 @@ namespace Bind
 	protected:
 		RenderTarget(Graphics& gfx, ID3D11Texture2D* pTexture);
 		RenderTarget(Graphics& gfx, UINT width, UINT height);
-
-	protected:
 		UINT m_Width;
 		UINT m_Height;
-
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pTargetView;
 	};
 
 	class ShaderInputRenderTarget : public RenderTarget
 	{
 	public:
 		ShaderInputRenderTarget(Graphics& gfx, UINT width, UINT height, UINT slot);
-		virtual void Bind(Graphics& gfx) noexcept override;
-
-		virtual void Resize(Graphics& gfx, UINT width, UINT height) override;
-	
+		void Bind(Graphics& gfx) noxnd override;
 		Surface ToSurface(Graphics& gfx) const;
 	private:
 		UINT m_Slot;
@@ -58,7 +45,7 @@ namespace Bind
 	{
 		friend Graphics;
 	public:
-		virtual void Bind(Graphics& gfx) noexcept override;
+		void Bind(Graphics& gfx) noxnd override;
 	private:
 		OutputOnlyRenderTarget(Graphics& gfx, ID3D11Texture2D* pTexture);
 	};

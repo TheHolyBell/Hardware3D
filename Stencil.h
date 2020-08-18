@@ -52,7 +52,7 @@ namespace Bind
 
 			GetDevice(gfx)->CreateDepthStencilState(&dsDesc, &m_pStencil);
 		}
-		void Bind(Graphics& gfx) noexcept override
+		void Bind(Graphics& gfx) noxnd override
 		{
 			INFOMAN_NOHR(gfx);
 			GFX_THROW_INFO_ONLY(GetContext(gfx)->OMSetDepthStencilState(m_pStencil.Get(), 0xFF));

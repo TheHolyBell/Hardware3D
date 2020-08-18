@@ -29,7 +29,7 @@ namespace Bind
 		));
 	}
 
-	void VertexShader::Bind(Graphics& gfx) noexcept
+	void VertexShader::Bind(Graphics& gfx) noxnd
 	{
 		GetContext(gfx)->VSSetShader(m_pVertexShader.Get(), nullptr, 0u);
 	}

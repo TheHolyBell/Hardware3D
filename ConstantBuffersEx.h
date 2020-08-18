@@ -61,7 +61,7 @@ namespace Bind
 	{
 	public:
 		using ConstantBufferEx::ConstantBufferEx;
-		void Bind(Graphics& gfx) noexcept override
+		void Bind(Graphics& gfx) noxnd override
 		{
 			GetContext(gfx)->PSSetConstantBuffers(m_Slot, 1u, m_pConstantBuffer.GetAddressOf());
 		}
@@ -71,7 +71,7 @@ namespace Bind
 	{
 	public:
 		using ConstantBufferEx::ConstantBufferEx;
-		void Bind(Graphics& gfx) noexcept override
+		void Bind(Graphics& gfx) noxnd override
 		{
 			GetContext(gfx)->VSSetConstantBuffers(m_Slot, 1u, m_pConstantBuffer.GetAddressOf());
 		}
@@ -104,7 +104,7 @@ namespace Bind
 			m_Buffer.CopyFrom(buf_in);
 			m_bDirty = true;
 		}
-		virtual void Bind(Graphics& gfx) noexcept override
+		virtual void Bind(Graphics& gfx) noxnd override
 		{
 			if (m_bDirty)
 			{

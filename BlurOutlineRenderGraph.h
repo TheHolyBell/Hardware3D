@@ -4,6 +4,7 @@
 #include "ConstantBuffersEx.h"
 
 class Graphics;
+class Camera;
 namespace Bind
 {
 	class Bindable;
@@ -17,7 +18,12 @@ namespace RenderGraph
 	public:
 		BlurOutlineRenderGraph(Graphics& gfx);
 		void RenderWidgets(Graphics& gfx);
+		void DumpShadowMap(Graphics& gfx, const std::string& path);
+		
+		void BindMainCamera(Camera& cam);
+		void BindShadowCamera(Camera& cam);
 	private:
+		// private functions
 		void SetKernelGauss(int radius, float sigma) noxnd;
 		void SetKernelBox(int radius) noxnd;
 		// private data

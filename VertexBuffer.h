@@ -13,7 +13,7 @@ namespace Bind
 		VertexBuffer(Graphics& gfx, const std::string& tag, const Dynamic::VertexBuffer& vbuf);
 		VertexBuffer(Graphics& gfx, const Dynamic::VertexBuffer& vbuf);
 		
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 		const Dynamic::VertexLayout& GetLayout() const noexcept;
 

@@ -53,11 +53,11 @@ UINT Drawable::GetIndexCount() const noxnd
 	return m_pIndices->GetCount();
 }
 
-void Drawable::LinkTechniques(RenderGraph::RenderGraph& rg)
+void Drawable::LinkTechniques(RenderGraph::RenderGraph& renderGraph)
 {
 	for (auto& tech : m_Techniques)
 	{
-		tech.Link(rg);
+		tech.Link(renderGraph);
 	}
 }
 

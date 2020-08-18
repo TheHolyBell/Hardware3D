@@ -15,7 +15,7 @@ namespace Bind
 		GFX_THROW_INFO(GetDevice(gfx)->CreateRasterizerState(&_rsDesc, &m_pRasterizerState));
 	}
 
-	void Rasterizer::Bind(Graphics& gfx) noexcept
+	void Rasterizer::Bind(Graphics& gfx) noxnd
 	{
 		GetContext(gfx)->RSSetState(m_pRasterizerState.Get());
 	}

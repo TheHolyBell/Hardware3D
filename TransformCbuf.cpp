@@ -12,7 +12,7 @@ namespace Bind
 		}
 	}
 
-	void TransformCbuf::Bind(Graphics& gfx) noexcept
+	void TransformCbuf::Bind(Graphics& gfx) noxnd
 	{
 		INFOMAN_NOHR(gfx);
 		GFX_THROW_INFO_ONLY(UpdateBindImpl(gfx, GetTransforms(gfx)));

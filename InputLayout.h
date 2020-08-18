@@ -14,7 +14,7 @@ namespace Bind
 			Dynamic::VertexLayout layout,
 			const VertexShader& vs);
 
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 		
 		const Dynamic::VertexLayout GetLayout() const noexcept;

@@ -9,7 +9,7 @@ namespace Bind
 
 	}
 
-	void Topology::Bind(Graphics& gfx) noexcept
+	void Topology::Bind(Graphics& gfx) noxnd
 	{
 		GetContext(gfx)->IASetPrimitiveTopology(m_Topology);
 	}

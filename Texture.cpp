@@ -91,7 +91,7 @@ namespace Bind
 		GetContext(gfx)->GenerateMips(m_pTextureView.Get());
 	}
 
-	void Texture::Bind(Graphics& gfx) noexcept
+	void Texture::Bind(Graphics& gfx) noxnd
 	{
 		GetContext(gfx)->PSSetShaderResources(m_Slot, 1u, m_pTextureView.GetAddressOf());
 	}

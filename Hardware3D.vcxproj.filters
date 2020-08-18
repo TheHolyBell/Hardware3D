@@ -312,6 +312,15 @@
     <ClCompile Include="CameraContainer.cpp">
       <Filter>CameraSystem</Filter>
     </ClCompile>
+    <ClCompile Include="StepLinkingProbe.cpp">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowSampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowCameraCBuf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsMessageMap.h">
@@ -884,6 +893,18 @@
     <ClInclude Include="WireframePass.h">
       <Filter>Header Files\Render Queue System\PassLib</Filter>
     </ClInclude>
+    <ClInclude Include="StepLinkingProbe.h">
+      <Filter>Header Files\Render Queue System</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMappingPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowSampler.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowCameraCBuf.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Hardware3D.rc">
@@ -1008,6 +1029,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="PhongDifMskSpc_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowTest_VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="ShadowTest_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

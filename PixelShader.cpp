@@ -20,7 +20,7 @@ namespace Bind
 		GFX_THROW_INFO(GetDevice(gfx)->CreatePixelShader(m_pByteCode->GetBufferPointer(), m_pByteCode->GetBufferSize(), nullptr, &m_pPixelShader));
 	}
 
-	void PixelShader::Bind(Graphics& gfx) noexcept
+	void PixelShader::Bind(Graphics& gfx) noxnd
 	{
 		GetContext(gfx)->PSSetShader(m_pPixelShader.Get(), nullptr, 0u);
 	}

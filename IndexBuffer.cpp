@@ -27,7 +27,7 @@ namespace Bind
 		GFX_THROW_INFO(GetDevice(gfx)->CreateBuffer(&ibd, &isd, &m_pIndexBuffer));
 	}
 
-	void IndexBuffer::Bind(Graphics& gfx) noexcept
+	void IndexBuffer::Bind(Graphics& gfx) noxnd
 	{
 		GetContext(gfx)->IASetIndexBuffer(m_pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 	}

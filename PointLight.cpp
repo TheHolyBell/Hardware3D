@@ -1,5 +1,6 @@
 #include "PointLight.h"
 #include "ImGui\imgui.h"
+#include "Camera.h"
 
 PointLight::PointLight(Graphics& gfx, DirectX::XMFLOAT3 pos, float radius)
 	: m_Mesh(gfx, radius), m_CBuffer(gfx)
@@ -21,11 +22,6 @@ void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
 {
 	if (ImGui::Begin("Light"))
 	{
-		ImGui::Text("Position");
-		ImGui::SliderFloat("X", &m_cbData.pos.x, -60.0f, 60.0f, "%.1f");
-		ImGui::SliderFloat("Y", &m_cbData.pos.y, -60.0f, 60.0f, "%.1f");
-		ImGui::SliderFloat("Z", &m_cbData.pos.z, -60.0f, 60.0f, "%.1f");
-
 		ImGui::Text("Intensity/Color");
 		ImGui::SliderFloat("Intensity", &m_cbData.diffuseIntensity, 0.01f, 2.0f, "%.2f", 2);
 		ImGui::ColorEdit3("Diffuse Color", &m_cbData.diffuseColor.x);
@@ -42,6 +38,7 @@ void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
 			m_Mesh.RenderGizmo(gfx);
 
 		m_cbData.pos = m_Mesh.GetPos();
+		m_pCamera->SetPos(m_cbData.pos);
 		if (ImGui::Button("Reset"))
 		{
 			Reset();

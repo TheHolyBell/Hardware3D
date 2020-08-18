@@ -11,7 +11,7 @@ namespace Bind
 		IndexBuffer(Graphics& gfx, const std::vector<unsigned short>& indices);
 		IndexBuffer(Graphics& gfx, std::string tag, const std::vector<unsigned short>& indices);
 
-		virtual void Bind(Graphics& gfx) noexcept override;
+		virtual void Bind(Graphics& gfx) noxnd override;
 		virtual std::string GetUID() const noexcept override;
 		UINT GetCount() const noexcept;
 
