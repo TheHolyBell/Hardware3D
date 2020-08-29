@@ -92,6 +92,10 @@ void Graphics::BeginFrame(float red, float green, float blue) noexcept
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
 	}
+
+	ID3D11ShaderResourceView* _NullResource = nullptr;
+	m_pImmediateContext->PSSetShaderResources(0, 1, &_NullResource);
+	m_pImmediateContext->PSSetShaderResources(3, 1, &_NullResource);
 }
 
 void Graphics::EndFrame()
@@ -181,19 +185,19 @@ void Graphics::OnResize(int Width, int Height)
 
 	HRESULT hr;
 
-	//m_pTarget->ReleaseBuffer();
-	try
-	{
-		GFX_THROW_INFO(m_pSwapChain->ResizeBuffers(1, Width, Height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
-	}
-	catch (HrException& exc)
-	{
-		std::cout << exc.what() << std::endl;
-	}
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> _pBackbuffer;
-	GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_pBackbuffer));
-	//m_pTarget = std::shared_ptr<Bind::RenderTarget>(new Bind::OutputOnlyRenderTarget(*this, _pBackbuffer.Get()));
-	//m_pTarget->Reset(*this, _pBackbuffer.Get());
+	////m_pTarget->ReleaseBuffer();
+	//try
+	//{
+	//	GFX_THROW_INFO(m_pSwapChain->ResizeBuffers(1, Width, Height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
+	//}
+	//catch (HrException& exc)
+	//{
+	//	std::cout << exc.what() << std::endl;
+	//}
+	//Microsoft::WRL::ComPtr<ID3D11Texture2D> _pBackbuffer;
+	//GFX_THROW_INFO(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &_pBackbuffer));
+	////m_pTarget = std::shared_ptr<Bind::RenderTarget>(new Bind::OutputOnlyRenderTarget(*this, _pBackbuffer.Get()));
+	////m_pTarget->Reset(*this, _pBackbuffer.Get());
 
 	D3D11_VIEWPORT vp = {};
 	vp.Width = Width;
@@ -203,7 +207,7 @@ void Graphics::OnResize(int Width, int Height)
 
 	m_pImmediateContext->RSSetViewports(1, &vp);
 
-	m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, (float)Width / (float)Height, 1.0f, 3000.0f);
+	//m_Projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, (float)Width / (float)Height, 1.0f, 3000.0f);
 	std::cout << "Window resized. New dimensions: [" << Width << ";" << Height << "]\n";
 }
 

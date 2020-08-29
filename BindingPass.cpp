@@ -17,7 +17,7 @@ namespace RenderGraph
 		m_Binds.push_back(std::move(bind));
 	}
 
-	void BindingPass::BindAll(Graphics& gfx) const noexcept
+	void BindingPass::BindAll(Graphics& gfx) const noxnd
 	{
 		BindBufferResources(gfx);
 		for (auto& bind : m_Binds)

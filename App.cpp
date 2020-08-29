@@ -187,7 +187,7 @@ void App::DoFrame(float dt)
 	
 	m_CameraContainer.SpawnWindow(gfx);
 	m_Light.SpawnControlWindow(gfx);
-	m_RenderGraph.RenderWidgets(gfx);
+	m_RenderGraph.RenderWindows(gfx);
 
 	m_Cube.SpawnControlWindow(gfx, "Cube 1");
 	m_Cube2.SpawnControlWindow(gfx, "Cube 2");
@@ -233,7 +233,7 @@ void App::HandleRawInput(float dt)
 	{
 		if (!m_Window.CursorEnabled())
 		{
-			std::cout << "DeltaX: " << delta->x << " " << "DeltaY: " << delta->y << std::endl;
+			//std::cout << "DeltaX: " << delta->x << " " << "DeltaY: " << delta->y << std::endl;
 			m_CameraContainer->Rotate((float)delta->x, (float)delta->y);
 		}
 	}
@@ -294,7 +294,7 @@ void App::HandleGamepad(float dt)
 
 		m_CameraContainer->Rotate(Right.first * m_Sensitivity * dt, -Right.second * m_Sensitivity * dt);
 
-		std::cout << "DeltaX: " << Right.first  << " " << "DeltaY: " << Right.second  << std::endl;
+		//std::cout << "DeltaX: " << Right.first  << " " << "DeltaY: " << Right.second  << std::endl;
 
 		m_CameraContainer->Translate({ Left.first * dt, 0.0f, Left.second * dt });
 

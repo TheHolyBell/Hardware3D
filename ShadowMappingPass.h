@@ -12,7 +12,7 @@
 #include "Blender.h"
 #include "NullPixelShader.h"
 #include "Camera.h"
-#include <iostream>
+#include "ShadowRasterizer.h"
 
 class Graphics;
 
@@ -35,6 +35,7 @@ namespace RenderGraph
 			AddBind(NullPixelShader::Resolve(gfx));
 			AddBind(Stencil::Resolve(gfx, Stencil::Mode::Off));
 			AddBind(Blender::Resolve(gfx, false));
+			AddBind(std::make_unique<Bind::ShadowRasterizer>(gfx, 50, 2.0f, 0.1f));
 			RegisterSource(DirectBindableSource<Bind::DepthStencil>::Make("map", m_DepthStencil));
 		}
 		void Execute(Graphics& gfx) const noxnd override

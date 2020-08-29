@@ -136,7 +136,7 @@ void Camera::SetPos(const DirectX::XMFLOAT3& pos) noexcept
 {
 	m_Pos = pos;
 	m_Indicator.SetPos(pos);
-	m_Indicator.SetPos(pos);
+	m_Projection.SetPos(pos);
 }
 
 const std::string& Camera::GetName() const noexcept

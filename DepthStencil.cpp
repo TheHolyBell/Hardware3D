@@ -81,8 +81,8 @@ namespace Bind
 	void DepthStencil::BindAsBuffer(Graphics& gfx) noxnd
 	{
 		INFOMAN_NOHR(gfx);
-		//GFX_THROW_INFO_ONLY(GetContext(gfx)->OMSetRenderTargets(0, nullptr, m_pDepthStencilView.Get()));
-		GetContext(gfx)->OMSetRenderTargets(0, nullptr, m_pDepthStencilView.Get());
+		GFX_THROW_INFO_ONLY(GetContext(gfx)->OMSetRenderTargets(0, nullptr, m_pDepthStencilView.Get()));
+		//GetContext(gfx)->OMSetRenderTargets(0, nullptr, m_pDepthStencilView.Get());
 	}
 
 	void DepthStencil::BindAsBuffer(Graphics& gfx, BufferResource* renderTarget) noxnd

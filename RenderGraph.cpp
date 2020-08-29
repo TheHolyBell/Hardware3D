@@ -61,7 +61,6 @@ namespace RenderGraph
 		assert(m_bFinalized);
 		for (auto& p : m_Passes)
 		{
-			std::cout << p->GetName() << std::endl;
 			p->Execute(gfx);
 		}
 	}

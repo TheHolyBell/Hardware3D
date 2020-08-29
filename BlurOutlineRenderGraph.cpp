@@ -13,27 +13,31 @@
 #include "DynamicConstant.h"
 #include "imgui/imgui.h"
 #include "ChiliMath.h"
+#include "ShadowRasterizer.h"
+#include "SkyboxPass.h"
 
 namespace RenderGraph
 {
 	BlurOutlineRenderGraph::BlurOutlineRenderGraph(Graphics& gfx)
-		:
-		RenderGraph(gfx)
+		: RenderGraph(gfx)
 	{
 		{
 			auto pass = std::make_unique<BufferClearPass>("clearRT");
 			pass->SetSinkLinkage("buffer", "$.backbuffer");
 			AppendPass(std::move(pass));
 		}
+
 		{
 			auto pass = std::make_unique<BufferClearPass>("clearDS");
 			pass->SetSinkLinkage("buffer", "$.masterDepth");
 			AppendPass(std::move(pass));
 		}
+
 		{
 			auto pass = std::make_unique<ShadowMappingPass>(gfx, "shadowMap");
 			AppendPass(std::move(pass));
 		}
+
 		{
 			auto pass = std::make_unique<LambertianPass>(gfx, "lambertian");
 			pass->SetSinkLinkage("shadowMap", "shadowMap.map");
@@ -41,9 +45,17 @@ namespace RenderGraph
 			pass->SetSinkLinkage("depthStencil", "clearDS.buffer");
 			AppendPass(std::move(pass));
 		}
+
+		{
+			auto pass = std::make_unique<SkyboxPass>(gfx, "skybox");
+			pass->SetSinkLinkage("renderTarget", "lambertian.renderTarget");
+			pass->SetSinkLinkage("depthStencil", "lambertian.depthStencil");
+			AppendPass(std::move(pass));
+		}
+
 		{
 			auto pass = std::make_unique<OutlineMaskGenerationPass>(gfx, "outlineMask");
-			pass->SetSinkLinkage("depthStencil", "lambertian.depthStencil");
+			pass->SetSinkLinkage("depthStencil", "skybox.depthStencil");
 			AppendPass(std::move(pass));
 		}
 
@@ -72,6 +84,7 @@ namespace RenderGraph
 			auto pass = std::make_unique<BlurOutlineDrawingPass>(gfx, "outlineDraw", gfx.GetWidth(), gfx.GetHeight());
 			AppendPass(std::move(pass));
 		}
+
 		{
 			auto pass = std::make_unique<HorizontalBlurPass>("horizontal", gfx, gfx.GetWidth(), gfx.GetHeight());
 			pass->SetSinkLinkage("scratchIn", "outlineDraw.scratchOut");
@@ -79,15 +92,17 @@ namespace RenderGraph
 			pass->SetSinkLinkage("direction", "$.blurDirection");
 			AppendPass(std::move(pass));
 		}
+
 		{
 			auto pass = std::make_unique<VerticalBlurPass>("vertical", gfx);
-			pass->SetSinkLinkage("renderTarget", "lambertian.renderTarget");
+			pass->SetSinkLinkage("renderTarget", "skybox.renderTarget");
 			pass->SetSinkLinkage("depthStencil", "outlineMask.depthStencil");
 			pass->SetSinkLinkage("scratchIn", "horizontal.scratchOut");
 			pass->SetSinkLinkage("kernel", "$.blurKernel");
 			pass->SetSinkLinkage("direction", "$.blurDirection");
 			AppendPass(std::move(pass));
 		}
+
 		{
 			auto pass = std::make_unique<WireframePass>(gfx, "wireframe");
 			pass->SetSinkLinkage("renderTarget", "vertical.renderTarget");
@@ -99,42 +114,30 @@ namespace RenderGraph
 		Finalize();
 	}
 
-	void BlurOutlineRenderGraph::SetKernelGauss(int radius, float sigma) noxnd
+	void BlurOutlineRenderGraph::RenderWindows(Graphics& gfx)
 	{
-		assert(radius <= s_MaxRadius);
-		auto k = m_BlurKernel->GetBuffer();
-		const int nTaps = radius * 2 + 1;
-		k["nTaps"] = nTaps;
-		float sum = 0.0f;
-		for (int i = 0; i < nTaps; i++)
-		{
-			const auto x = float(i - radius);
-			const auto g = gauss(x, sigma);
-			sum += g;
-			k["coefficients"][i] = g;
-		}
-		for (int i = 0; i < nTaps; i++)
-		{
-			k["coefficients"][i] = (float)k["coefficients"][i] / sum;
-		}
-		m_BlurKernel->SetBuffer(k);
+		RenderKernelWindow(gfx);
+		dynamic_cast<SkyboxPass&>(FindPassByName("skybox")).RenderWindow();
 	}
 
-	void BlurOutlineRenderGraph::SetKernelBox(int radius) noxnd
+	void BlurOutlineRenderGraph::DumpShadowMap(Graphics& gfx, const std::string& path)
 	{
-		assert(radius <= s_MaxRadius);
-		auto k = m_BlurKernel->GetBuffer();
-		const int nTaps = radius * 2 + 1;
-		k["nTaps"] = nTaps;
-		const float c = 1.0f / nTaps;
-		for (int i = 0; i < nTaps; i++)
-		{
-			k["coefficients"][i] = c;
-		}
-		m_BlurKernel->SetBuffer(k);
+		dynamic_cast<ShadowMappingPass&>(FindPassByName("shadowMap")).DumpShadowMap(gfx, path);
 	}
 
-	void BlurOutlineRenderGraph::RenderWidgets(Graphics& gfx)
+	void BlurOutlineRenderGraph::BindMainCamera(Camera& cam)
+	{
+		dynamic_cast<LambertianPass&>(FindPassByName("lambertian")).BindMainCamera(cam);
+		dynamic_cast<SkyboxPass&>(FindPassByName("skybox")).BindMainCamera(cam);
+	}
+
+	void BlurOutlineRenderGraph::BindShadowCamera(Camera& cam)
+	{
+		dynamic_cast<ShadowMappingPass&>(FindPassByName("shadowMap")).BindShadowCamera(cam);
+		dynamic_cast<LambertianPass&>(FindPassByName("lambertian")).BindShadowCamera(cam);
+	}
+
+	void BlurOutlineRenderGraph::RenderKernelWindow(Graphics& gfx)
 	{
 		if (ImGui::Begin("Kernel"))
 		{
@@ -185,18 +188,35 @@ namespace RenderGraph
 		}
 		ImGui::End();
 	}
-	void BlurOutlineRenderGraph::DumpShadowMap(Graphics& gfx, const std::string& path)
+
+	void BlurOutlineRenderGraph::SetKernelGauss(int radius, float sigma) noxnd
 	{
-		dynamic_cast<ShadowMappingPass&>(FindPassByName("shadowMap")).DumpShadowMap(gfx, path);
+		assert(radius <= s_MaxRadius);
+		auto k = m_BlurKernel->GetBuffer();
+		const int nTaps = radius * 2 + 1;
+		k["nTaps"] = nTaps;
+		float sum = 0.0f;
+		for (int i = 0; i < nTaps; ++i)
+		{
+			const auto x = float(i - radius);
+			const auto g = gauss(x, sigma);
+			sum += g;
+			k["coefficients"][i] = g;
+		}
+		for (int i = 0; i < nTaps; ++i)
+			k["coefficients"][i] = (float)k["coefficients"][i] / sum;
+		m_BlurKernel->SetBuffer(k);
 	}
-	
-	void BlurOutlineRenderGraph::BindMainCamera(Camera& cam)
+
+	void BlurOutlineRenderGraph::SetKernelBox(int radius) noxnd
 	{
-		dynamic_cast<LambertianPass&>(FindPassByName("lambertian")).BindMainCamera(cam);
-	}
-	void BlurOutlineRenderGraph::BindShadowCamera(Camera& cam)
-	{
-		dynamic_cast<ShadowMappingPass&>(FindPassByName("shadowMap")).BindShadowCamera(cam);
-		dynamic_cast<LambertianPass&>(FindPassByName("lambertian")).BindShadowCamera(cam);
+		assert(radius <= s_MaxRadius);
+		auto k = m_BlurKernel->GetBuffer();
+		const int nTaps = radius * 2 + 1;
+		k["nTaps"] = nTaps;
+		const float c = 1.0f / nTaps;
+		for (int i = 0; i < nTaps; ++i)
+			k["coefficients"][i] = c;
+		m_BlurKernel->SetBuffer(k);
 	}
 }

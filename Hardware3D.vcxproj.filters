@@ -315,10 +315,19 @@
     <ClCompile Include="StepLinkingProbe.cpp">
       <Filter>Header Files\Render Queue System</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowSampler.cpp">
+    <ClCompile Include="ShadowCameraCBuf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowCameraCBuf.cpp">
+    <ClCompile Include="ShadowRasterizer.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowSampler.cpp">
+      <Filter>Source Files\Bindable</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxTransformCBuf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -905,6 +914,18 @@
     <ClInclude Include="ShadowCameraCBuf.h">
       <Filter>Header Files\Bindable</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowRasterizer.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeTexture.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxTransformCBuf.h">
+      <Filter>Header Files\Bindable</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxPass.h">
+      <Filter>Header Files\Render Queue System\PassLib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Hardware3D.rc">
@@ -966,6 +987,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="process.json" />
+    <None Include="VShadow.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="PShadow.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="_PShadow_Dynamic.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="_PShadow_Static.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Solid_VS.hlsl">
@@ -1035,6 +1068,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="ShadowTest_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Skybox_VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Skybox_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

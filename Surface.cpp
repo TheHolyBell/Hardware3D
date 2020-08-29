@@ -61,6 +61,11 @@ unsigned int Surface::GetHeight() const noexcept
 	return (unsigned int)m_Scratch.GetMetadata().height;
 }
 
+unsigned int Surface::GetBytePitch() const noexcept
+{
+	return (unsigned int)m_Scratch.GetImage(0, 0, 0)->rowPitch;
+}
+
 Surface::Color* Surface::GetBufferPtr() noexcept
 {
 	return reinterpret_cast<Color*>(m_Scratch.GetPixels());

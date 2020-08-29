@@ -103,7 +103,7 @@ public:
 	Surface(unsigned int width, unsigned int height);
 	Surface(Surface&& source) noexcept = default;
 	Surface(Surface&) = delete;
-	Surface& operator=(Surface&& donor) noexcept = default;
+	Surface& operator=(Surface && donor) noexcept = default;
 	Surface& operator=(const Surface&) = delete;
 	~Surface() = default;
 	void Clear(Color fillValue) noexcept;
@@ -111,11 +111,12 @@ public:
 	Color GetPixel(unsigned int x, unsigned int y) const noxnd;
 	unsigned int GetWidth() const noexcept;
 	unsigned int GetHeight() const noexcept;
+	unsigned int GetBytePitch() const noexcept;
 	Color* GetBufferPtr() noexcept;
 	const Color* GetBufferPtr() const noexcept;
 	const Color* GetBufferPtrConst() const noexcept;
-	static Surface FromFile(const std::string& name);
-	void Save(const std::string& filename) const;
+	static Surface FromFile(const std::string & name);
+	void Save(const std::string & filename) const;
 	bool AlphaLoaded() const noexcept;
 private:
 	Surface(DirectX::ScratchImage scratch) noexcept;

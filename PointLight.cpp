@@ -1,6 +1,7 @@
 #include "PointLight.h"
 #include "ImGui\imgui.h"
 #include "Camera.h"
+#include "ChiliMath.h"
 
 PointLight::PointLight(Graphics& gfx, DirectX::XMFLOAT3 pos, float radius)
 	: m_Mesh(gfx, radius), m_CBuffer(gfx)
@@ -15,7 +16,7 @@ PointLight::PointLight(Graphics& gfx, DirectX::XMFLOAT3 pos, float radius)
 		0.0075f,
 	};
 	Reset();
-	m_pCamera = std::make_shared<Camera>(gfx, "Light", m_cbData.pos, 0.0f, 0.0f, true);
+	m_pCamera = std::make_shared<Camera>(gfx, "Light", m_cbData.pos, 0.0f, PI / 2.0f, true);
 }
 
 void PointLight::SpawnControlWindow(Graphics& gfx) noexcept
