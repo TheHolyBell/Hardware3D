@@ -46,6 +46,26 @@ namespace Bind
 		throw std::runtime_error{ "Base usage for Colored format map in DepthStencil." };
 	}
 
+	DepthStencil::DepthStencil(Graphics& gfx, Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture, UINT face)
+	{
+		INFOMAN(gfx);
+
+		D3D11_TEXTURE2D_DESC _descTex = {};
+		pTexture->GetDesc(&_descTex);
+		m_Width = _descTex.Width;
+		m_Height = _descTex.Height;
+
+		// Create target view of depth stencil texture
+		D3D11_DEPTH_STENCIL_VIEW_DESC _descView = {};
+		_descView.Format = DXGI_FORMAT_D32_FLOAT;
+		_descView.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+		_descView.Texture2DArray.ArraySize = 1;
+		_descView.Texture2DArray.FirstArraySlice = face;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateDepthStencilView(
+			pTexture.Get(), &_descView, &m_pDepthStencilView
+		));
+	}
+
 	DepthStencil::DepthStencil(Graphics& gfx, UINT width, UINT height, bool canBindShaderInput, Usage usage)
 		:
 		m_Width(width),
@@ -229,6 +249,11 @@ namespace Bind
 		GFX_THROW_INFO_ONLY(GetContext(gfx)->PSSetShaderResources(m_Slot, 1u, m_pShaderResourceView.GetAddressOf()));
 	}
 
+
+	OutputOnlyDepthStencil::OutputOnlyDepthStencil(Graphics& gfx, Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture, UINT face)
+		: DepthStencil(gfx, std::move(pTexture), face)
+	{
+	}
 
 	OutputOnlyDepthStencil::OutputOnlyDepthStencil(Graphics& gfx)
 		:

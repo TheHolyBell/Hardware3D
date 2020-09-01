@@ -58,4 +58,52 @@ namespace Bind
 		INFOMAN_NOHR(gfx);
 		GFX_THROW_INFO_ONLY(GetContext(gfx)->PSSetShaderResources(m_Slot, 1, m_pTextureView.GetAddressOf()));
 	}
+
+	DepthCubeTexture::DepthCubeTexture(Graphics& gfx, UINT size, UINT slot)
+		: m_Slot(slot)
+	{
+		INFOMAN(gfx);
+
+		// Texture description
+		D3D11_TEXTURE2D_DESC _textureDesc = {};
+		_textureDesc.Width = size;
+		_textureDesc.Height = size;
+		_textureDesc.MipLevels = 1;
+		_textureDesc.ArraySize = 6;
+		_textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+		_textureDesc.SampleDesc.Count = 1;
+		_textureDesc.SampleDesc.Quality = 0;
+		_textureDesc.Usage = D3D11_USAGE_DEFAULT;
+		_textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
+		_textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+		// Create the texture resource
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> _pTexture;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateTexture2D(
+			&_textureDesc, nullptr, &_pTexture
+		));
+
+		// Create the resource view on the texture
+		D3D11_SHADER_RESOURCE_VIEW_DESC _srvDesc = {};
+		_srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		_srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+		_srvDesc.Texture2D.MipLevels = 1;
+		GFX_THROW_INFO(GetDevice(gfx)->CreateShaderResourceView(
+			_pTexture.Get(), &_srvDesc, &m_pTextureView
+		));
+
+		// Make depth buffer resources for capturing shadow map
+		for (int face = 0; face < 6; ++face)
+			m_DepthBuffers.push_back(std::make_unique<OutputOnlyDepthStencil>(gfx, _pTexture, face));
+	}
+
+	void DepthCubeTexture::Bind(Graphics& gfx) noxnd
+	{
+		INFOMAN_NOHR(gfx);
+		GFX_THROW_INFO_ONLY(GetContext(gfx)->PSSetShaderResources(m_Slot, 1, m_pTextureView.GetAddressOf()));
+	}
+
+	OutputOnlyDepthStencil& Bind::DepthCubeTexture::GetDepthBuffer(size_t index) const
+	{
+		return *m_DepthBuffers[index];
+	}
 }
